@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { Play, Presentation, FileText, Bookmark, ExternalLink } from "lucide-react";
 import { cn, formatTimestamp } from "@/lib/utils";
@@ -5,7 +7,7 @@ import { cn, formatTimestamp } from "@/lib/utils";
 export type EvidenceType = "timestamp" | "slide" | "page" | "note";
 
 export interface CitationChipProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "type"> {
   type: EvidenceType;
   value: string | number;
   label?: string;

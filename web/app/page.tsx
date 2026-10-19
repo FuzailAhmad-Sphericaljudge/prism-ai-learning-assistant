@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Clock, FileCheck, BrainCircuit, Sparkles, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,13 +39,15 @@ export default function Home() {
         {/* Action CTAs */}
         <div className="flex flex-wrap items-center justify-center gap-4 mb-16">
           <Button variant="primary" size="lg" asChild>
-            <Link href="/classroom" className="gap-2">
-              Enter Classroom <ArrowRight className="h-4 w-4" />
+            <Link href="/classroom" className="flex items-center gap-2">
+              <span>Enter Classroom</span>
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="glass" size="lg" asChild>
-            <Link href="/design" className="gap-2">
-              <Sparkles className="h-4 w-4 text-prism-violet" /> Component Kitchen Sink
+            <Link href="/design" className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-prism-violet" />
+              <span>Component Kitchen Sink</span>
             </Link>
           </Button>
         </div>
@@ -122,7 +126,7 @@ export default function Home() {
               </div>
               <GlassCardTitle>Temporal Firewall</GlassCardTitle>
               <GlassCardDescription>
-                Prevents premature knowledge leaks by bounding vector search to $t \le T_{playback}$.
+                Prevents premature knowledge leaks by bounding vector search to t &le; T_playback.
               </GlassCardDescription>
             </GlassCardHeader>
           </GlassCard>
