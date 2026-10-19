@@ -10,13 +10,13 @@ SERVER_START_TIME = time.time()
 
 
 class HealthResponse(BaseModel):
-    status: str = Field(..., example="ok")
-    app: str = Field(..., example="PRISM API")
-    version: str = Field(..., example="0.1.0")
-    environment: str = Field(..., example="development")
-    llm_provider: str = Field(..., example="mock")
-    uptime_seconds: float = Field(..., example=12.34)
-    timestamp: str = Field(..., example="2026-10-19T17:15:00.000000Z")
+    status: str = Field(..., json_schema_extra={"example": "ok"})
+    app: str = Field(..., json_schema_extra={"example": "PRISM API"})
+    version: str = Field(..., json_schema_extra={"example": "0.1.0"})
+    environment: str = Field(..., json_schema_extra={"example": "development"})
+    llm_provider: str = Field(..., json_schema_extra={"example": "mock"})
+    uptime_seconds: float = Field(..., json_schema_extra={"example": 12.34})
+    timestamp: str = Field(..., json_schema_extra={"example": "2026-10-19T17:15:00.000000Z"})
 
 
 class VersionResponse(BaseModel):
