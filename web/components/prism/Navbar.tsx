@@ -9,13 +9,17 @@ import { SITE_CONFIG } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import { useApiHealth } from "@/lib/hooks/use-api-health";
+
 export interface NavbarProps {
   apiStatus?: "online" | "offline" | "checking";
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ apiStatus = "online" }) => {
+export const Navbar: React.FC<NavbarProps> = ({ apiStatus: propApiStatus }) => {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const { status: liveStatus } = useApiHealth();
+  const apiStatus = propApiStatus || liveStatus;
 
   const statusConfig = {
     online: {
@@ -157,3 +161,4 @@ export const Navbar: React.FC<NavbarProps> = ({ apiStatus = "online" }) => {
     </header>
   );
 };
+
