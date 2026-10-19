@@ -1,0 +1,26 @@
+{
+  "name": "prism-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PRISM: Temporal Evidence Firewall & Timestamp-Aware Learning Assistant",
+  "workspaces": [
+    "web"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=web",
+    "build:web": "npm run build --workspace=web",
+    "lint:web": "npm run lint --workspace=web",
+    "test:api": "pytest api",
+    "start:api": "uvicorn api.main:app --reload --port 8000"
+  },
+  "keywords": [
+    "education",
+    "ai",
+    "fastapi",
+    "nextjs",
+    "temporal-evidence-firewall",
+    "pgvector"
+  ],
+  "author": "The Falcons",
+  "license": "MIT"
+}
