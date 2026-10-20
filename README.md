@@ -1,7 +1,11 @@
 # PRISM
 
 > **Temporal Evidence Firewall & Timestamp-Aware Learning Assistant**  
-> *Built by Team The Falcons for Hackathon 2026*
+> *Built by Team The Falcons (Fuzail Ahmad & Lakshya Garg) for Hackathon 2026*
+>
+> 🌐 **Live Web App:** [web-one-blue-mbb8ovavhb.vercel.app](https://web-one-blue-mbb8ovavhb.vercel.app)  
+> ⚡ **Live API Service:** [prism-api-z7c9.onrender.com](https://prism-api-z7c9.onrender.com/health)  
+> 📦 **GitHub Repository:** [github.com/FuzailAhmad-Sphericaljudge/prism-ai-learning-assistant](https://github.com/FuzailAhmad-Sphericaljudge/prism-ai-learning-assistant)
 
 ---
 
