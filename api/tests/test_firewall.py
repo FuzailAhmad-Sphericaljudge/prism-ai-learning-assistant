@@ -93,3 +93,57 @@ def test_filter_candidate_chunks_batch():
     assert admitted[0].chunk_id == "c1"
     assert admitted[1].chunk_id == "c2"
     assert blocked[0].chunk_id == "c3"
+
+
+def test_slide_temporal_policy_admission_and_exclusion():
+    """Slide 6 is admitted at 18:42 (1122s); Slide 7 (starts at 1122s) is blocked prior to 1122s."""
+    slide6 = ChunkCandidate(
+        chunk_id="slide-6",
+        source_id="src-ppt",
+        source_type="ppt",
+        text="Order statistics: Tree-Minimum, Tree-Maximum, Successor.",
+        slide=6,
+    )
+    slide7 = ChunkCandidate(
+        chunk_id="slide-7",
+        source_id="src-ppt",
+        source_type="ppt",
+        text="Deletion: 3 Structural Cases (Leaf, Single Child, Two Children).",
+        slide=7,
+    )
+
+    # At 15:00 (900s): Slide 6 admitted, Slide 7 blocked
+    dec6 = evaluate_chunk_firewall(slide6, playback_sec=900.0, mode=FirewallMode.LEARN_SO_FAR)
+    dec7 = evaluate_chunk_firewall(slide7, playback_sec=900.0, mode=FirewallMode.LEARN_SO_FAR)
+    assert dec6.admitted is True
+    assert dec7.admitted is False
+    assert dec7.status == AdmitStatus.EXCLUDED_RESOURCE_POLICY
+
+    # At 18:42 (1122s): Slide 7 becomes permitted
+    dec7_at_1842 = evaluate_chunk_firewall(slide7, playback_sec=1122.0, mode=FirewallMode.LEARN_SO_FAR)
+    assert dec7_at_1842.admitted is True
+
+
+def test_pdf_handout_temporal_policy_admission_and_exclusion():
+    """PDF Page 2 is admitted up to 18:42; Page 3 is blocked before 18:42."""
+    pdf_p2 = ChunkCandidate(
+        chunk_id="pdf-p2",
+        source_id="src-pdf",
+        source_type="pdf",
+        text="Section 3: Search, Insertion, Successor algorithms.",
+        page=2,
+    )
+    pdf_p3 = ChunkCandidate(
+        chunk_id="pdf-p3",
+        source_id="src-pdf",
+        source_type="pdf",
+        text="Section 5: Deletion algorithm and self-balancing trees.",
+        page=3,
+    )
+
+    # At 10:00 (600s): Page 2 admitted, Page 3 blocked
+    dec_p2 = evaluate_chunk_firewall(pdf_p2, playback_sec=600.0, mode=FirewallMode.LEARN_SO_FAR)
+    dec_p3 = evaluate_chunk_firewall(pdf_p3, playback_sec=600.0, mode=FirewallMode.LEARN_SO_FAR)
+    assert dec_p2.admitted is True
+    assert dec_p3.admitted is False
+
