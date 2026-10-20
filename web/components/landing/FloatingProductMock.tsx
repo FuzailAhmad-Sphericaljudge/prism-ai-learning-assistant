@@ -225,20 +225,53 @@ export const FloatingProductMock: React.FC = () => {
 
                     <div className="flex flex-wrap items-center gap-2">
                       <div
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Inspect video evidence timestamp 14:12"
                         onMouseEnter={() => setActiveEvidence(EVIDENCE_SNIPPETS["14:12"])}
                         onMouseLeave={() => setActiveEvidence(null)}
+                        onFocus={() => setActiveEvidence(EVIDENCE_SNIPPETS["14:12"])}
+                        onBlur={() => setActiveEvidence(null)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            setActiveEvidence(activeEvidence?.citation === "Video [14:12]" ? null : EVIDENCE_SNIPPETS["14:12"]);
+                          }
+                        }}
+                        className="outline-none focus-visible:ring-1 focus-visible:ring-prism-cyan rounded-md"
                       >
                         <CitationChip type="timestamp" value="14:12" className="cursor-pointer hover:border-prism-cyan" />
                       </div>
                       <div
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Inspect slide evidence slide 18"
                         onMouseEnter={() => setActiveEvidence(EVIDENCE_SNIPPETS["18"])}
                         onMouseLeave={() => setActiveEvidence(null)}
+                        onFocus={() => setActiveEvidence(EVIDENCE_SNIPPETS["18"])}
+                        onBlur={() => setActiveEvidence(null)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            setActiveEvidence(activeEvidence?.citation === "Slide 18" ? null : EVIDENCE_SNIPPETS["18"]);
+                          }
+                        }}
+                        className="outline-none focus-visible:ring-1 focus-visible:ring-prism-violet rounded-md"
                       >
                         <CitationChip type="slide" value={18} className="cursor-pointer hover:border-prism-violet" />
                       </div>
                       <div
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Inspect notes evidence page 42"
                         onMouseEnter={() => setActiveEvidence(EVIDENCE_SNIPPETS["42"])}
                         onMouseLeave={() => setActiveEvidence(null)}
+                        onFocus={() => setActiveEvidence(EVIDENCE_SNIPPETS["42"])}
+                        onBlur={() => setActiveEvidence(null)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            setActiveEvidence(activeEvidence?.citation === "Page 42" ? null : EVIDENCE_SNIPPETS["42"]);
+                          }
+                        }}
+                        className="outline-none focus-visible:ring-1 focus-visible:ring-prism-pink rounded-md"
                       >
                         <CitationChip type="page" value={42} className="cursor-pointer hover:border-prism-pink" />
                       </div>
