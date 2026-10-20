@@ -193,7 +193,7 @@ export const FirewallDemo: React.FC = () => {
                     14:30 Vector
                   </Button>
                   <Button
-                    variant="secondary"
+                    variant="outline"
                     size="sm"
                     className="text-xs font-mono h-7 px-2.5 border-amber-400/40 text-amber-300 bg-amber-400/10 hover:bg-amber-400/20"
                     onClick={() => handleJump(1122)}
