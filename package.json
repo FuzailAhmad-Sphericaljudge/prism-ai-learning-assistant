@@ -13,7 +13,8 @@
     "test:api": "pytest api",
     "start:api": "uvicorn api.main:app --reload --port 8000",
     "verify:env": "python scripts/check_env.py",
-    "verify:landing": "python scripts/verify_landing.py"
+    "verify:landing": "python scripts/verify_landing.py",
+    "verify:phase3": "python scripts/verify_phase3.py"
   },
   "keywords": [
     "education",
