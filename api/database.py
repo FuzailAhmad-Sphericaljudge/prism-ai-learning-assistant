@@ -16,14 +16,25 @@ def get_engine():
         logger.warning("DATABASE_URL is not set. Database operations will fail.")
         return None
 
+    # Normalize driver scheme for SQLAlchemy 2.0 (prefer psycopg v3 if psycopg2 not specified)
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql+psycopg://", 1)
+    elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+"):
+        try:
+            import psycopg  # noqa: F401
+            db_url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
+        except ImportError:
+            pass
+
     # Supabase connection pool configuration
     return create_engine(
         db_url,
         pool_size=5,
         max_overflow=10,
-        pool_timeout=30,
+        pool_timeout=10,
         pool_recycle=300,
         pool_pre_ping=True,
+        connect_args={"connect_timeout": 5},
     )
 
 
