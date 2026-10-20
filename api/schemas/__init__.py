@@ -27,6 +27,21 @@ from api.schemas.chat import (
     CitationItem,
     DiagnosticCheck,
 )
+from api.schemas.practice import (
+    PracticeQuestion,
+    PracticeGenerateRequest,
+    PracticeGenerateResponse,
+    AttemptSubmitRequest,
+    AttemptSubmitResponse,
+    RevisionAction,
+)
+from api.schemas.mastery import (
+    ConceptMastery,
+    NextBestAction,
+    MasteryDashboardResponse,
+    TimelineAttemptItem,
+    MasteryTimelineResponse,
+)
 
 __all__ = [
     "CourseCreate",
@@ -48,4 +63,15 @@ __all__ = [
     "ChatResponse",
     "CitationItem",
     "DiagnosticCheck",
+    "PracticeQuestion",
+    "PracticeGenerateRequest",
+    "PracticeGenerateResponse",
+    "AttemptSubmitRequest",
+    "AttemptSubmitResponse",
+    "RevisionAction",
+    "ConceptMastery",
+    "NextBestAction",
+    "MasteryDashboardResponse",
+    "TimelineAttemptItem",
+    "MasteryTimelineResponse",
 ]
