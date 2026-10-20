@@ -147,3 +147,48 @@ def test_pdf_handout_temporal_policy_admission_and_exclusion():
     assert dec_p2.admitted is True
     assert dec_p3.admitted is False
 
+
+def test_explore_ahead_mode_unconstrained_admission():
+    """In explore_ahead mode, future chunks and future slides are admitted."""
+    future_chunk = ChunkCandidate(
+        chunk_id="chunk-avl",
+        source_id="src-video",
+        source_type="video",
+        text="AVL tree rotations maintain height balance invariant |h_L - h_R| <= 1.",
+        start_sec=1600.0,
+        end_sec=1650.0,
+    )
+    decision = evaluate_chunk_firewall(
+        candidate=future_chunk,
+        playback_sec=500.0,
+        mode=FirewallMode.EXPLORE_AHEAD,
+    )
+    assert decision.admitted is True
+    assert decision.status == AdmitStatus.ADMITTED
+    assert decision.permitted_text == future_chunk.text
+
+
+def test_mode_switch_back_purges_explored_ahead_conversation_turns():
+    """
+    When returning to learn_so_far mode, any prior turns tagged as explored_ahead
+    or occurring at a future timestamp must be strictly excised from conversation context.
+    """
+    from api.firewall.conversation_filter import filter_conversation_history
+
+    messages = [
+        {"id": "m1", "role": "user", "content": "What is the BST property?", "playback_sec": 300.0, "explored_ahead": False},
+        {"id": "m2", "role": "assistant", "content": "Keys in left subtree < x.key.", "playback_sec": 300.0, "explored_ahead": False},
+        {"id": "m3", "role": "user", "content": "Tell me about AVL rotations in advance.", "playback_sec": 1600.0, "explored_ahead": True},
+        {"id": "m4", "role": "assistant", "content": "AVL trees rotate around the unbalanced pivot.", "playback_sec": 1600.0, "explored_ahead": True},
+    ]
+
+    # In explore_ahead: all 4 turns visible
+    exploratory_history = filter_conversation_history(messages, current_mode=FirewallMode.EXPLORE_AHEAD, playback_sec=300.0)
+    assert len(exploratory_history) == 4
+
+    # Returning to learn_so_far at 300s: m3 and m4 must be purged!
+    guarded_history = filter_conversation_history(messages, current_mode=FirewallMode.LEARN_SO_FAR, playback_sec=300.0)
+    assert len(guarded_history) == 2
+    assert [m["id"] for m in guarded_history] == ["m1", "m2"]
+
+
