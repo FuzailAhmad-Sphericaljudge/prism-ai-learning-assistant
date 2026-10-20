@@ -6,6 +6,12 @@ import { SectionHeading } from "@/components/prism/SectionHeading";
 import { COMPARISON_ROWS } from "./landing-data";
 
 export const ComparisonTable: React.FC = () => {
+  const [filterMode, setFilterMode] = React.useState<"all" | "critical">("all");
+
+  const displayedRows = filterMode === "critical"
+    ? COMPARISON_ROWS.filter((r) => r.highlight)
+    : COMPARISON_ROWS;
+
   return (
     <section id="comparison" className="py-24 border-t border-white/[0.08] relative overflow-hidden bg-[#07080D]">
       <div className="container max-w-7xl mx-auto px-4 sm:px-8">
@@ -15,8 +21,34 @@ export const ComparisonTable: React.FC = () => {
           gradientTitle="PRISM Assistant"
           subtitle="Why frontier foundation models cannot be trusted with educational curricula without an active Temporal Evidence Firewall."
           align="center"
-          className="mb-16"
+          className="mb-8"
         />
+
+        {/* Filter Toggle */}
+        <div className="flex items-center justify-center gap-2 mb-8">
+          <button
+            type="button"
+            onClick={() => setFilterMode("all")}
+            className={`px-3 py-1 rounded-full text-xs font-mono transition-colors ${
+              filterMode === "all"
+                ? "bg-white/10 text-white font-bold border border-white/20"
+                : "text-foreground-subtle hover:text-white"
+            }`}
+          >
+            All Capabilities ({COMPARISON_ROWS.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilterMode("critical")}
+            className={`px-3 py-1 rounded-full text-xs font-mono transition-colors ${
+              filterMode === "critical"
+                ? "bg-prism-cyan/20 text-prism-cyan font-bold border border-prism-cyan/30"
+                : "text-foreground-subtle hover:text-white"
+            }`}
+          >
+            Critical Integrity Invariants
+          </button>
+        </div>
 
         <div className="w-full max-w-5xl mx-auto overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0E1018] shadow-2xl">
           <div className="overflow-x-auto">
@@ -38,7 +70,7 @@ export const ComparisonTable: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.06] text-xs">
-                {COMPARISON_ROWS.map((row) => (
+                {displayedRows.map((row) => (
                   <tr
                     key={row.feature}
                     className="hover:bg-white/[0.02] transition-colors"
