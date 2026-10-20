@@ -5,6 +5,7 @@ import { Navbar } from "@/components/prism/Navbar";
 import { Footer } from "@/components/prism/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryProvider } from "@/providers/query-provider";
 import { SITE_CONFIG } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -68,10 +69,12 @@ export default function RootLayout({
         className={`${fontInter.variable} ${fontMono.variable} min-h-screen bg-[#07080D] text-[#F1F5F9] font-sans antialiased flex flex-col selection:bg-prism-violet/30 selection:text-white bg-noise`}
       >
         <TooltipProvider delayDuration={200}>
-          <Navbar />
-          <main className="flex-1 flex flex-col">{children}</main>
-          <Footer />
-          <Toaster />
+          <QueryProvider>
+            <Navbar />
+            <main className="flex-1 flex flex-col">{children}</main>
+            <Footer />
+            <Toaster />
+          </QueryProvider>
         </TooltipProvider>
       </body>
     </html>
