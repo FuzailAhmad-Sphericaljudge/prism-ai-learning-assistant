@@ -1,3 +1,14 @@
+import sys
+from pathlib import Path
+
+# Ensure root directory is in sys.path whether executed from root or api/
+_BASE_DIR = Path(__file__).resolve().parent
+_ROOT_DIR = _BASE_DIR.parent
+if str(_ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(_ROOT_DIR))
+if str(_BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(_BASE_DIR))
+
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
