@@ -4,18 +4,18 @@ import logging
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks, status
 from fastapi.responses import FileResponse
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
+from sqlalchemy.orm import Session
 
 from api.database import get_db
 from api.models.course import Course
 from api.models.source import Source
+from api.models.chunk import Chunk
 from api.schemas.source import SourceResponse, SourceStatusResponse
 from api.ingestion.worker import run_ingestion_job
 
 logger = logging.getLogger("prism.routers.sources")
 
-# Router mounted at root or /courses and /sources
 router = APIRouter(tags=["Sources"])
 
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
@@ -44,18 +44,18 @@ def infer_source_type(filename: str, explicit_type: Optional[str]) -> str:
     summary="Upload and ingest a multi-modal source",
     description="Uploads a lecture video/transcript, PDF textbook, PPTX slide deck, or Markdown notes and schedules background ingestion.",
 )
-async def upload_source(
+def upload_source(
     course_id: str,
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     title: Optional[str] = Form(None),
     type: Optional[str] = Form(None),
     version: int = Form(1),
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
 ) -> SourceResponse:
     # 1. Verify course
     c_stmt = select(Course).where(Course.id == course_id)
-    course = (await db.execute(c_stmt)).scalar_one_or_none()
+    course = db.execute(c_stmt).scalar_one_or_none()
     if not course:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Course '{course_id}' not found.")
 
@@ -83,7 +83,7 @@ async def upload_source(
         Source.title == source_title,
         Source.version == version,
     )
-    existing_source = (await db.execute(s_stmt)).scalar_one_or_none()
+    existing_source = db.execute(s_stmt).scalar_one_or_none()
 
     if existing_source:
         source = existing_source
@@ -103,8 +103,8 @@ async def upload_source(
         )
         db.add(source)
 
-    await db.commit()
-    await db.refresh(source)
+    db.commit()
+    db.refresh(source)
 
     # 4. Schedule asynchronous background ingestion
     background_tasks.add_task(
@@ -137,19 +137,18 @@ async def upload_source(
     summary="Get source ingestion progress status",
     description="Polls ingestion state (pending, processing, ready, failed) and chunk count for a source.",
 )
-async def get_source_status(
+def get_source_status(
     source_id: str,
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
 ) -> SourceStatusResponse:
     s_stmt = select(Source).where(Source.id == source_id)
-    source = (await db.execute(s_stmt)).scalar_one_or_none()
+    source = db.execute(s_stmt).scalar_one_or_none()
     if not source:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Source '{source_id}' not found.")
 
     # Count generated chunks
-    from api.models.chunk import Chunk
     c_stmt = select(func.count(Chunk.id)).where(Chunk.source_id == source_id)
-    chunk_count = (await db.execute(c_stmt)).scalar() or 0
+    chunk_count = db.execute(c_stmt).scalar() or 0
 
     return SourceStatusResponse(
         id=source.id,
@@ -170,12 +169,12 @@ async def get_source_status(
     summary="Download raw course source file",
     description="Streams original uploaded video/transcript, PDF, PPTX, or notes file.",
 )
-async def get_source_file(
+def get_source_file(
     source_id: str,
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
 ):
     s_stmt = select(Source).where(Source.id == source_id)
-    source = (await db.execute(s_stmt)).scalar_one_or_none()
+    source = db.execute(s_stmt).scalar_one_or_none()
     if not source:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Source '{source_id}' not found.")
 
@@ -196,5 +195,3 @@ async def get_source_file(
         media_type=media_type,
         filename=filename,
     )
-
-

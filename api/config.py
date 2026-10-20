@@ -1,8 +1,14 @@
+import os
+from pathlib import Path
 from functools import lru_cache
 from typing import List, Union
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import json
+
+_CONFIG_DIR = Path(__file__).resolve().parent
+_API_ENV = _CONFIG_DIR / ".env"
+_ROOT_ENV = _CONFIG_DIR.parent / ".env"
 
 
 class Settings(BaseSettings):
@@ -30,7 +36,7 @@ class Settings(BaseSettings):
     SUPABASE_KEY: str = ""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(_API_ENV, _ROOT_ENV, ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
     )

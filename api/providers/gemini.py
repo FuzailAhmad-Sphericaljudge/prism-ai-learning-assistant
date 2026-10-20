@@ -14,7 +14,7 @@ class GeminiProvider(LLMProvider):
     """
 
     GEN_MODEL = "gemini-1.5-flash"
-    EMBED_MODEL = "text-embedding-004"
+    EMBED_MODEL = "gemini-embedding-001"
     BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 
     def __init__(self, api_key: str):

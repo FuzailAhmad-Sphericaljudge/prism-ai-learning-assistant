@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, DateTime
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, DateTime
 from api.database import Base
 
 
@@ -9,11 +8,15 @@ def utc_now():
     return datetime.now(timezone.utc)
 
 
+def generate_uuid() -> str:
+    return str(uuid.uuid4())
+
+
 class UUIDMixin:
     id = Column(
-        UUID(as_uuid=True),
+        String(36),
         primary_key=True,
-        default=uuid.uuid4,
+        default=generate_uuid,
         index=True,
         nullable=False,
     )

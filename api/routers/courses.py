@@ -2,8 +2,7 @@ import logging
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import Session, selectinload
 
 from api.database import get_db
 from api.models.course import Course
@@ -29,13 +28,13 @@ router = APIRouter(prefix="/courses", tags=["Courses"])
     summary="Create a new course",
     description="Registers a new academic course or lecture series.",
 )
-async def create_course(
+def create_course(
     payload: CourseCreate,
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
 ) -> CourseResponse:
     # Check if course code already exists
     stmt = select(Course).where(Course.code == payload.code)
-    existing = (await db.execute(stmt)).scalar_one_or_none()
+    existing = db.execute(stmt).scalar_one_or_none()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -50,8 +49,8 @@ async def create_course(
         term=payload.term or "Fall 2026",
     )
     db.add(course)
-    await db.commit()
-    await db.refresh(course)
+    db.commit()
+    db.refresh(course)
 
     return CourseResponse(
         id=course.id,
@@ -72,12 +71,11 @@ async def create_course(
     summary="List all courses",
     description="Returns all registered courses with active multi-modal source counts.",
 )
-async def list_courses(
-    db: AsyncSession = Depends(get_db),
+def list_courses(
+    db: Session = Depends(get_db),
 ) -> List[CourseResponse]:
     stmt = select(Course).options(selectinload(Course.sources)).order_by(Course.created_at.desc())
-    result = await db.execute(stmt)
-    courses = result.scalars().all()
+    courses = db.execute(stmt).scalars().all()
 
     return [
         CourseResponse(
@@ -101,13 +99,12 @@ async def list_courses(
     summary="Get course by ID",
     description="Retrieves course metadata and ingested source count.",
 )
-async def get_course(
+def get_course(
     course_id: str,
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
 ) -> CourseResponse:
     stmt = select(Course).options(selectinload(Course.sources)).where(Course.id == course_id)
-    result = await db.execute(stmt)
-    course = result.scalar_one_or_none()
+    course = db.execute(stmt).scalar_one_or_none()
 
     if not course:
         raise HTTPException(
@@ -134,14 +131,14 @@ async def get_course(
     summary="Get lecture transcript with Temporal Firewall boundary filtering",
     description="Returns ordered transcript cues. If max_time_sec is passed, enforces temporal boundary cutoff and partial boundary truncation.",
 )
-async def get_course_transcript(
+def get_course_transcript(
     course_id: str,
     max_time_sec: Optional[float] = Query(None, description="Optional temporal cutoff in seconds"),
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
 ) -> CourseTranscriptResponse:
     # 1. Verify course existence
     c_stmt = select(Course).where(Course.id == course_id)
-    course = (await db.execute(c_stmt)).scalar_one_or_none()
+    course = db.execute(c_stmt).scalar_one_or_none()
     if not course:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Course '{course_id}' not found.")
 
@@ -151,7 +148,7 @@ async def get_course_transcript(
         .where(Source.course_id == course_id, Source.type.in_(["video", "transcript"]))
         .order_by(Source.version.desc())
     )
-    source = (await db.execute(s_stmt)).scalars().first()
+    source = db.execute(s_stmt).scalars().first()
 
     if not source:
         return CourseTranscriptResponse(
@@ -170,7 +167,7 @@ async def get_course_transcript(
         .where(Chunk.source_id == source.id, Chunk.start_sec.isnot(None))
         .order_by(Chunk.start_sec.asc())
     )
-    chunks = (await db.execute(q_chunks)).scalars().all()
+    chunks = db.execute(q_chunks).scalars().all()
 
     cues: List[TranscriptCueResponse] = []
     for c in chunks:
@@ -212,19 +209,19 @@ async def get_course_transcript(
     summary="Get multi-modal course resources",
     description="Returns all ingested sources grouped by modality (video, pdf, ppt, notes) with ingestion status.",
 )
-async def get_course_resources(
+def get_course_resources(
     course_id: str,
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
 ) -> CourseResourcesResponse:
     # 1. Verify course
     c_stmt = select(Course).where(Course.id == course_id)
-    course = (await db.execute(c_stmt)).scalar_one_or_none()
+    course = db.execute(c_stmt).scalar_one_or_none()
     if not course:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Course '{course_id}' not found.")
 
     # 2. Query sources
     s_stmt = select(Source).where(Source.course_id == course_id).order_by(Source.created_at.asc())
-    sources = (await db.execute(s_stmt)).scalars().all()
+    sources = db.execute(s_stmt).scalars().all()
 
     grouped: dict = {"video": [], "pdf": [], "ppt": [], "notes": []}
     for s in sources:
@@ -252,5 +249,3 @@ async def get_course_resources(
         total_sources=len(sources),
         resources=grouped,
     )
-
-

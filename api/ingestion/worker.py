@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, Union
 from sqlalchemy import select, delete, func
-from api.database import AsyncSessionLocal
+from api.database import SessionLocal
 from api.models.source import Source
 from api.models.chunk import Chunk
 from api.parsers import parse_source
@@ -23,49 +23,58 @@ async def run_ingestion_job(
     """
     logger.info(f"Starting background ingestion for source={source_id} (file={filename})")
 
-    async with AsyncSessionLocal() as session:
-        # 1. Fetch Source record
+    if SessionLocal is None:
+        logger.error("SessionLocal is not initialized. Database URL missing.")
+        return
+
+    # 1. Fetch Source record and mark 'processing'
+    with SessionLocal() as session:
         stmt = select(Source).where(Source.id == source_id)
-        result = await session.execute(stmt)
-        source = result.scalar_one_or_none()
+        source = session.execute(stmt).scalar_one_or_none()
 
         if not source:
             logger.error(f"Ingestion aborted: Source {source_id} not found in database.")
             return
 
-        # 2. Transition status to 'processing'
+        source_type = source.type
+        source_title = source.title
+
         source.status = "processing"
         source.error_message = None
-        await session.commit()
+        session.commit()
 
-        try:
-            # 3. Parse source content into standardized ParsedBlock units
-            blocks = parse_source(
-                content_or_path=file_source,
-                source_type=source.type,
-                filename=filename or source.title,
-            )
-            logger.info(f"Parsed {len(blocks)} raw blocks from source {source_id}")
+    try:
+        # 2. Parse source content into standardized ParsedBlock units
+        blocks = parse_source(
+            content_or_path=file_source,
+            source_type=source_type,
+            filename=filename or source_title,
+        )
+        logger.info(f"Parsed {len(blocks)} raw blocks from source {source_id}")
 
-            if not blocks:
-                logger.warning(f"No content blocks extracted from source {source_id}")
-                source.status = "ready"
-                source.meta = {**(source.meta or {}), "chunk_count": 0}
-                await session.commit()
-                return
+        if not blocks:
+            logger.warning(f"No content blocks extracted from source {source_id}")
+            with SessionLocal() as session:
+                s = session.execute(select(Source).where(Source.id == source_id)).scalar_one_or_none()
+                if s:
+                    s.status = "ready"
+                    s.meta = {**(s.meta or {}), "chunk_count": 0}
+                    session.commit()
+            return
 
-            # 4. Chunk blocks into retrieval windows
-            chunks_data = chunk_blocks(blocks, source.type)
-            logger.info(f"Generated {len(chunks_data)} chunks for source {source_id}")
+        # 3. Chunk blocks into retrieval windows
+        chunks_data = chunk_blocks(blocks, source_type)
+        logger.info(f"Generated {len(chunks_data)} chunks for source {source_id}")
 
-            # 5. Generate 768-dim vector embeddings in batches
-            embeddings = await generate_chunk_embeddings(chunks_data, batch_size=32, dimension=768)
+        # 4. Generate 768-dim vector embeddings in batches
+        embeddings = await generate_chunk_embeddings(chunks_data, batch_size=32, dimension=768)
 
-            # 6. Idempotent cleanup: delete any existing chunks for this source
+        # 5. Idempotent database upsert
+        with SessionLocal() as session:
+            # Delete any existing chunks for this source
             del_stmt = delete(Chunk).where(Chunk.source_id == source_id)
-            await session.execute(del_stmt)
+            session.execute(del_stmt)
 
-            # 7. Insert new Chunk records with PostgreSQL tsvector computation
             chunk_models = []
             max_end_sec = 0.0
             max_page = 0
@@ -94,29 +103,31 @@ async def run_ingestion_job(
 
             session.add_all(chunk_models)
 
-            # 8. Update source metadata and mark ready
-            if max_end_sec > 0:
-                source.duration_sec = round(max_end_sec, 2)
-            if max_page > 0:
-                source.page_count = max_page
-            elif max_slide > 0:
-                source.page_count = max_slide
+            # Update Source status and metadata
+            s = session.execute(select(Source).where(Source.id == source_id)).scalar_one_or_none()
+            if s:
+                if max_end_sec > 0:
+                    s.duration_sec = round(max_end_sec, 2)
+                if max_page > 0:
+                    s.page_count = max_page
+                elif max_slide > 0:
+                    s.page_count = max_slide
 
-            source.status = "ready"
-            source.meta = {
-                **(source.meta or {}),
-                "chunk_count": len(chunk_models),
-                "total_blocks": len(blocks),
-            }
+                s.status = "ready"
+                s.meta = {
+                    **(s.meta or {}),
+                    "chunk_count": len(chunk_models),
+                    "total_blocks": len(blocks),
+                }
 
-            await session.commit()
+            session.commit()
             logger.info(f"Ingestion succeeded for source {source_id}: {len(chunk_models)} chunks stored.")
 
-        except Exception as exc:
-            logger.error(f"Ingestion pipeline failed for source {source_id}: {exc}", exc_info=True)
-            await session.rollback()
-
-            # Record failure status
-            source.status = "failed"
-            source.error_message = str(exc)
-            await session.commit()
+    except Exception as exc:
+        logger.error(f"Ingestion pipeline failed for source {source_id}: {exc}", exc_info=True)
+        with SessionLocal() as session:
+            s = session.execute(select(Source).where(Source.id == source_id)).scalar_one_or_none()
+            if s:
+                s.status = "failed"
+                s.error_message = str(exc)
+                session.commit()

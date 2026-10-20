@@ -5,9 +5,7 @@ from api.models.chunk import Chunk, DocumentChunk
 from api.models.user import User
 from api.models.session import Session, Message
 from api.models.mastery import Attempt, MasteryRecord
-from api.models.interview import InterviewSession, InterviewExchange, MockInterview
-from api.models.lecture import VideoLecture
-from api.models.diagnostic import DiagnosticCheck, MisconceptionRecord
+from api.models.interview import InterviewSession, InterviewExchange
 
 __all__ = [
     "Base",
@@ -26,8 +24,4 @@ __all__ = [
     "MasteryRecord",
     "InterviewSession",
     "InterviewExchange",
-    "MockInterview",
-    "VideoLecture",
-    "DiagnosticCheck",
-    "MisconceptionRecord",
 ]
