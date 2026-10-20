@@ -108,3 +108,50 @@ async def chat_stream(
             "X-Accel-Buffering": "no",
         },
     )
+
+
+@router.post("", response_model=ChatResponse)
+def chat_sync(
+    payload: ChatRequest,
+    db: DBSession = Depends(get_db),
+):
+    """
+    Synchronous chat endpoint for grounded AI tutor queries.
+    Returns complete ChatResponse with citations and diagnostic check.
+    """
+    # 1. Verify course
+    course = db.query(Course).filter(Course.id == payload.course_id).first()
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Course with ID '{payload.course_id}' not found.",
+        )
+
+    # 2. Gather temporal context cues
+    nearby_cues = _get_nearby_transcript_cues(
+        db=db,
+        course_id=payload.course_id,
+        playback_sec=payload.playback_sec,
+    )
+
+    # 3. Execute tutor workflow
+    chat_response = workflow.execute(
+        req=payload,
+        db=db,
+        nearby_cues=nearby_cues,
+    )
+
+    # 4. Persist messages and evidence snapshot
+    msg_id = persist_chat_turn(
+        db=db,
+        session_id=payload.session_id,
+        user_query=payload.query,
+        chat_response=chat_response,
+        playback_sec=payload.playback_sec,
+        mode=payload.mode,
+    )
+    if msg_id:
+        chat_response.message_id = msg_id
+
+    return chat_response
+
