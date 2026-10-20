@@ -115,3 +115,34 @@ def test_practice_generator_mcq_and_short_answer_types():
         assert len(sa_q.explanation) > 10
     finally:
         db.close()
+
+
+def test_practice_generator_all_canonical_concepts_covered():
+    """
+    Validates that every canonical concept defined in the BST taxonomy
+    can generate valid questions with complete evidence links.
+    """
+    db = SessionLocal()
+    try:
+        generator = PracticeGenerator()
+        seeded_course_id = "00000000-0000-0000-0000-000000000002"
+        from api.practice.taxonomy import BST_CONCEPTS
+
+        for concept in BST_CONCEPTS:
+            req = PracticeGenerateRequest(
+                course_id=seeded_course_id,
+                playback_sec=1680.0,
+                mode=FirewallMode.EXPLORE_AHEAD,
+                concept_tag=concept.tag,
+                question_type="mcq",
+            )
+            res = generator.generate(req=req, db=db)
+            assert len(res.questions) > 0
+            q = res.questions[0]
+            assert q.concept_tag == concept.tag
+            assert len(q.evidence_links) > 0
+            assert q.options is not None
+            assert len(q.options) == 4
+    finally:
+        db.close()
+
