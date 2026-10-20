@@ -205,3 +205,52 @@ async def get_course_transcript(
         cues=cues,
     )
 
+
+@router.get(
+    "/{course_id}/resources",
+    response_model=CourseResourcesResponse,
+    summary="Get multi-modal course resources",
+    description="Returns all ingested sources grouped by modality (video, pdf, ppt, notes) with ingestion status.",
+)
+async def get_course_resources(
+    course_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> CourseResourcesResponse:
+    # 1. Verify course
+    c_stmt = select(Course).where(Course.id == course_id)
+    course = (await db.execute(c_stmt)).scalar_one_or_none()
+    if not course:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Course '{course_id}' not found.")
+
+    # 2. Query sources
+    s_stmt = select(Source).where(Source.course_id == course_id).order_by(Source.created_at.asc())
+    sources = (await db.execute(s_stmt)).scalars().all()
+
+    grouped: dict = {"video": [], "pdf": [], "ppt": [], "notes": []}
+    for s in sources:
+        stype = s.type if s.type in grouped else "notes"
+        grouped[stype].append(
+            SourceResponse(
+                id=s.id,
+                course_id=s.course_id,
+                type=s.type,
+                title=s.title,
+                file_path=s.file_path,
+                version=s.version,
+                status=s.status,
+                error_message=s.error_message,
+                duration_sec=s.duration_sec,
+                page_count=s.page_count,
+                meta=s.meta,
+                created_at=s.created_at,
+                updated_at=s.updated_at,
+            )
+        )
+
+    return CourseResourcesResponse(
+        course_id=course_id,
+        total_sources=len(sources),
+        resources=grouped,
+    )
+
+
