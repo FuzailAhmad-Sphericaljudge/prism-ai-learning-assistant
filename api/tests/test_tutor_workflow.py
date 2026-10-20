@@ -142,3 +142,56 @@ def test_tutor_workflow_explore_ahead_bypasses_future_restriction():
     assert resp.is_not_covered is False
     assert len(resp.citations) == 1
 
+
+def test_tutor_workflow_one_time_corrective_regeneration():
+    """Tests that an initial invalid citation triggers corrective regeneration."""
+    mock_db = MagicMock()
+    mock_retriever = MagicMock()
+    c1 = ScoredCandidate(
+        chunk_id="c1",
+        source_id="s1",
+        source_type="video",
+        text="Grounded content on BST invariants.",
+        start_sec=100.0,
+        end_sec=150.0,
+    )
+    mock_retriever.retrieve.return_value = RetrievalResult(
+        query="Invariants?",
+        course_id="c1",
+        playback_sec=200.0,
+        mode=FirewallMode.LEARN_SO_FAR,
+        admitted_candidates=[c1],
+    )
+
+    workflow = TutorWorkflow(retriever=mock_retriever)
+
+    # First call produces invalid citation [E99]; second call corrects to [E1]
+    invalid_gen = json.dumps({
+        "answer": "This claim cites non-existent [E99].",
+        "citations": [{"evidence_id": "E99", "quote": "none"}],
+        "diagnostic_check": {"question": "Q?", "options": ["A"], "correct_index": 0, "explanation": "exp"},
+    })
+    corrected_gen = json.dumps({
+        "answer": "This corrected claim cites valid [E1].",
+        "citations": [{"evidence_id": "E1", "quote": "Grounded content"}],
+        "diagnostic_check": {"question": "Q?", "options": ["A"], "correct_index": 0, "explanation": "exp"},
+    })
+
+    workflow.provider.generate = MagicMock(side_effect=[invalid_gen, corrected_gen])
+
+    req = ChatRequest(
+        query="Invariants?",
+        course_id="c1",
+        playback_sec=200.0,
+        mode=FirewallMode.LEARN_SO_FAR,
+    )
+
+    resp = workflow.execute(req, db=mock_db)
+
+    # Provider should have been called twice (1 initial + 1 corrective retry)
+    assert workflow.provider.generate.call_count == 2
+    assert resp.validation_passed is True
+    assert "corrected claim" in resp.answer
+    assert resp.citations[0].evidence_id == "E1"
+
+
