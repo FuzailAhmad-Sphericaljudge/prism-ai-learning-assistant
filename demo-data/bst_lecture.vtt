@@ -1,0 +1,179 @@
+WEBVTT - CS 201 Lecture 14: Binary Search Trees
+
+00:00:00.000 --> 00:00:15.000
+<v Dr. Elena Rostova>Good morning, everyone. Welcome to lecture fourteen of Computer Science 201: Data Structures and Algorithms.</v>
+
+00:00:15.000 --> 00:00:35.000
+<v Dr. Elena Rostova>Today we are embarking on one of the most foundational and ubiquitous hierarchical structures in computer science: the Binary Search Tree, or BST.</v>
+
+00:00:35.000 --> 00:00:55.000
+<v Dr. Elena Rostova>Before we dive into trees, let us remind ourselves why we need them. Consider an unsorted array or linked list.</v>
+
+00:00:55.000 --> 00:01:20.000
+<v Dr. Elena Rostova>In an unsorted array, inserting a new element at the end takes constant O(1) time, but searching for a key requires linear O(N) time because we must examine every element.</v>
+
+00:01:20.000 --> 00:01:45.000
+<v Dr. Elena Rostova>What if the array is sorted? Searching is now blazingly fast: binary search finds any item in logarithmic O(log N) time.</v>
+
+00:01:45.000 --> 00:02:15.000
+<v Dr. Elena Rostova>However, maintaining sorted order in a contiguous array is costly. Inserting or deleting an element requires shifting up to N elements, costing O(N) time in the worst case.</v>
+
+00:02:15.000 --> 00:02:45.000
+<v Dr. Elena Rostova>What about linked lists? Inserting at the head is O(1), but searching is strictly O(N) because we cannot jump to the middle node in constant time.</v>
+
+00:02:45.000 --> 00:03:15.000
+<v Dr. Elena Rostova>So here is the fundamental engineering challenge: can we design a dynamic data structure that achieves logarithmic O(log N) search like a sorted array, while simultaneously allowing logarithmic O(log N) insertions and deletions like a linked list?</v>
+
+00:03:15.000 --> 00:03:45.000
+<v Dr. Elena Rostova>The answer is a tree. More specifically, a binary tree governed by a strict ordering property.</v>
+
+00:03:45.000 --> 00:04:15.000
+<v Dr. Elena Rostova>Let us define the terminology. A binary tree is a rooted tree where every node has at most two children, conventionally termed the left child and the right child.</v>
+
+00:04:15.000 --> 00:04:40.000
+<v Dr. Elena Rostova>A node with no children is a leaf. The distance from the root to the deepest leaf is the height of the tree, denoted as h.</v>
+
+00:04:40.000 --> 00:05:00.000
+<v Dr. Elena Rostova>Keep height in mind, because as we will prove today, every fundamental operation on a BST runs in O(h) time.</v>
+
+00:05:00.000 --> 00:05:25.000
+<v Dr. Elena Rostova>Now let us state the core definition: what makes a binary tree a Binary Search Tree?</v>
+
+00:05:25.000 --> 00:05:55.000
+<v Dr. Elena Rostova>The Binary Search Tree Property states: let x be any node in a binary search tree. If y is a node in the left subtree of x, then key(y) must be strictly less than key(x).</v>
+
+00:05:55.000 --> 00:06:25.000
+<v Dr. Elena Rostova>Conversely, if y is a node in the right subtree of x, then key(y) must be strictly greater than key(x). If duplicate keys are allowed, we conventionally place equal keys in the right subtree.</v>
+
+00:06:25.000 --> 00:06:55.000
+<v Dr. Elena Rostova>Notice this is not merely a local relationship between a parent and its direct children. It is a universal property spanning the entire left and right subtrees!</v>
+
+00:06:55.000 --> 00:07:25.000
+<v Dr. Elena Rostova>Here is a common misconception I see every semester: students check if node 5 has a left child 3 and right child 8, but miss that node 8 has a left child 2! That violates the BST invariant because 2 is less than 5, yet it sits in 5s right subtree.</v>
+
+00:07:25.000 --> 00:07:55.000
+<v Dr. Elena Rostova>In memory, a BST node contains five fields: the key or payload, a pointer to the parent, a pointer to the left child, and a pointer to the right child.</v>
+
+00:07:55.000 --> 00:08:25.000
+<v Dr. Elena Rostova>What happens if we traverse a BST in in-order fashion? Remember in-order traversal: recursively visit left subtree, visit node, recursively visit right subtree.</v>
+
+00:08:25.000 --> 00:08:55.000
+<v Dr. Elena Rostova>Theorem: an in-order traversal of a binary search tree prints the keys in strictly monotonically non-decreasing sorted order.</v>
+
+00:08:55.000 --> 00:09:25.000
+<v Dr. Elena Rostova>We can prove this by induction on the size of the tree. The base case for an empty tree is vacuously sorted. For tree T with root x, all keys in the left subtree are smaller than x and printed first in sorted order, then x is printed, followed by all keys in the right subtree.</v>
+
+00:09:25.000 --> 00:10:00.000
+<v Dr. Elena Rostova>Thus, tree sort can be implemented simply by inserting N elements into a BST and running in-order traversal in O(N) time.</v>
+
+00:10:00.000 --> 00:10:25.000
+<v Dr. Elena Rostova>Now let us examine our first major operational algorithm: Search(root, k).</v>
+
+00:10:25.000 --> 00:10:55.000
+<v Dr. Elena Rostova>Searching begins at the root. If the current node is null or equals k, we return the node. If k is less than current.key, we recurse left. If k is greater, we recurse right.</v>
+
+00:10:55.000 --> 00:11:25.000
+<v Dr. Elena Rostova>Notice how at every step, we discard an entire subtree, exactly analogous to binary search on an array! The number of comparisons along the search path cannot exceed the height of the tree h.</v>
+
+00:11:25.000 --> 00:11:55.000
+<v Dr. Elena Rostova>Next, let us implement Insertion(root, z), where z is a new node with key k and null children.</v>
+
+00:11:55.000 --> 00:12:25.000
+<v Dr. Elena Rostova>To insert z into tree T, we trace a search path down the tree starting at root, maintaining a trailing pointer y that records the parent of current.</v>
+
+00:12:25.000 --> 00:12:55.000
+<v Dr. Elena Rostova>When current becomes null, we have found the exact leaf boundary where z belongs. If y is null, the tree was empty and z becomes the root.</v>
+
+00:12:55.000 --> 00:13:25.000
+<v Dr. Elena Rostova>Otherwise, if z.key is less than y.key, we set y.left equal to z. If z.key is greater, we set y.right equal to z. Finally, we set z.parent equal to y.</v>
+
+00:13:25.000 --> 00:13:55.000
+<v Dr. Elena Rostova>What is the time complexity of insertion? We descend down one path from root to leaf, touching at most h + 1 nodes. Thus, insertion runs in O(h) time.</v>
+
+00:13:55.000 --> 00:14:25.000
+<v Dr. Elena Rostova>Let us trace an example together. Suppose we insert keys 15, 6, 18, 3, 7, 17, 20 into an initially empty tree.</v>
+
+00:14:25.000 --> 00:15:00.000
+<v Dr. Elena Rostova>15 is root. 6 goes to 15s left. 18 goes to 15s right. 3 goes to 6s left. 7 goes to 6s right. 17 goes to 18s left. 20 goes to 18s right. This produces a balanced tree of height 2.</v>
+
+00:15:00.000 --> 00:15:25.000
+<v Dr. Elena Rostova>Next, let us look at order-statistic queries: finding the minimum, maximum, and successor of a node.</v>
+
+00:15:25.000 --> 00:15:55.000
+<v Dr. Elena Rostova>To find Tree-Minimum(x), we simply follow left child pointers from x until we reach a node whose left pointer is null. Because of the BST property, that leftmost node must contain the minimum key in xs subtree.</v>
+
+00:15:55.000 --> 00:16:25.000
+<v Dr. Elena Rostova>Symmetrically, Tree-Maximum(x) follows right child pointers until null. Both operations take at most O(h) time.</v>
+
+00:16:25.000 --> 00:16:55.000
+<v Dr. Elena Rostova>Now for a crucial operation: Successor(x). The successor of node x is the node with the smallest key strictly greater than x.key.</v>
+
+00:16:55.000 --> 00:17:25.000
+<v Dr. Elena Rostova>There are two distinct cases for Successor. Case 1: if node x has a non-empty right subtree, where is its successor? It is simply the minimum node in xs right subtree! That is Tree-Minimum(x.right).</v>
+
+00:17:25.000 --> 00:17:55.000
+<v Dr. Elena Rostova>Case 2: what if node x has no right subtree? Then the successor must be an ancestor of x. Specifically, we walk up parent pointers until we encounter the first ancestor whose left child is also an ancestor of x.</v>
+
+00:17:55.000 --> 00:18:25.000
+<v Dr. Elena Rostova>Let us verify this on node 13 with no right child: we walk up to parent 7 (13 is right child of 7, so continue), then to 6 (7 is right child of 6, continue), then to 15 (6 is left child of 15!). Stop! 15 is the successor of 13.</v>
+
+00:18:25.000 --> 00:18:42.000
+<v Dr. Elena Rostova>Both Case 1 and Case 2 traverse at most one path up or down the tree, so Successor runs in strictly O(h) time. This brings us to the eighteen minute mark.</v>
+
+00:18:42.000 --> 00:19:10.000
+<v Dr. Elena Rostova>Now, pay close attention, because deletion is the most subtle and intricate operation on binary search trees.</v>
+
+00:19:10.000 --> 00:19:40.000
+<v Dr. Elena Rostova>When we call Delete(T, z) to remove node z, there are three structural cases based on how many children node z possesses.</v>
+
+00:19:40.000 --> 00:20:10.000
+<v Dr. Elena Rostova>Case 1: Node z is a leaf with no children. This is straightforward. We simply update zs parent pointer to point to null instead of z, and free node z.</v>
+
+00:20:10.000 --> 00:20:40.000
+<v Dr. Elena Rostova>Case 2: Node z has exactly one child. Again, manageable: we splice z out by linking zs parent directly to zs only child, bypassing z entirely.</v>
+
+00:20:40.000 --> 00:21:10.000
+<v Dr. Elena Rostova>Case 3: Node z has two children. This is the hardest case. We cannot simply pull up both subtrees. Instead, we find zs successor, let us call it y. Since z has two children, y must be in zs right subtree, which means y has no left child!</v>
+
+00:21:10.000 --> 00:21:40.000
+<v Dr. Elena Rostova>If y is zs direct right child, we replace z with y. If y is deeper in zs right subtree, we first replace y with its own right child using a helper transplant procedure, and then replace z with y.</v>
+
+00:21:40.000 --> 00:22:05.000
+<v Dr. Elena Rostova>Because finding the successor takes O(h) and splicing takes O(1), Delete runs in O(h) time overall.</v>
+
+00:22:05.000 --> 00:22:30.000
+<v Dr. Elena Rostova>Take a moment to digest Case 3. Replacing a node with its in-order successor guarantees that all elements in the left subtree remain strictly smaller, and all elements in the right subtree remain strictly greater.</v>
+
+00:22:30.000 --> 00:22:55.000
+<v Dr. Elena Rostova>We have seen that Search, Insert, and Delete all run in O(h) time, where h is tree height. But what is h in terms of N, the number of nodes?</v>
+
+00:22:55.000 --> 00:23:25.000
+<v Dr. Elena Rostova>If the tree is perfectly balanced, the height h is logarithmic: floor(log2(N)). In this optimal scenario, our operations run in O(log N) time.</v>
+
+00:23:25.000 --> 00:23:55.000
+<v Dr. Elena Rostova>However, what happens if we insert keys into an empty BST in sorted ascending order: 1, then 2, then 3, then 4, up to N?</v>
+
+00:23:55.000 --> 00:24:25.000
+<v Dr. Elena Rostova>Every key is greater than the previous one, so every key becomes the right child of its predecessor! The tree degenerates into a single linear chain of length N.</v>
+
+00:24:25.000 --> 00:24:55.000
+<v Dr. Elena Rostova>In a degenerate tree, the height h equals N - 1. Our logarithmic search has completely collapsed back into linear O(N) traversal, no better than a linked list!</v>
+
+00:24:55.000 --> 00:25:30.000
+<v Dr. Elena Rostova>This worst-case behavior is unacceptable in mission-critical production systems. If an adversary submits presorted keys, our database index degrades from sub-millisecond response to seconds.</v>
+
+00:25:30.000 --> 00:26:00.000
+<v Dr. Elena Rostova>This catastrophic degeneracy motivates our next topic: self-balancing binary search trees.</v>
+
+00:26:00.000 --> 00:26:30.000
+<v Dr. Elena Rostova>How can we guarantee that height h remains O(log N) regardless of the order in which keys arrive? We introduce dynamic restructuring operations called tree rotations.</v>
+
+00:26:30.000 --> 00:27:00.000
+<v Dr. Elena Rostova>A rotation locally transforms pointer configurations in O(1) time while strictly preserving the binary search tree in-order invariant.</v>
+
+00:27:00.000 --> 00:27:30.000
+<v Dr. Elena Rostova>In next weeks lecture, we will study AVL Trees, which enforce that for every node, the heights of its left and right subtrees differ by at most 1, using single and double rotations.</v>
+
+00:27:30.000 --> 00:28:00.000
+<v Dr. Elena Rostova>We will also explore Red-Black Trees, the backbone of standard libraries in C++ std::map and Java TreeMap. Thank you for your attention, and I will see you on Wednesday!</v>
+
