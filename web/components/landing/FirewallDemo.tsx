@@ -122,6 +122,9 @@ export const FirewallDemo: React.FC = () => {
                       <Badge variant="cyan" dot className="font-mono text-[10px]">
                         t = {formatTime(playbackSeconds)}
                       </Badge>
+                      <span className="text-[10px] font-mono text-foreground-subtle hidden md:inline">
+                        ({Math.round((playbackSeconds / 1800) * 100)}% complete)
+                      </span>
                     </div>
                     <span className="text-xs text-foreground-subtle font-mono">
                       Window: [00:00 &rarr; {formatTime(playbackSeconds)}] &bull; Total: 30:00
