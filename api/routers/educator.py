@@ -39,6 +39,11 @@ def get_educator_insights(
     response_model=List[ConfusionHeatmapBucket],
     summary="Get temporal confusion heatmap along lecture video timeline",
 )
+@router.get(
+    "/heatmap",
+    response_model=List[ConfusionHeatmapBucket],
+    summary="Get temporal confusion heatmap along lecture video timeline (alias)",
+)
 def get_confusion_heatmap(
     course_id: str = Query("00000000-0000-0000-0000-000000000002", description="Course UUID"),
     db: DBSession = Depends(get_db),

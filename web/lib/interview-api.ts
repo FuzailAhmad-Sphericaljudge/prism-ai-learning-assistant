@@ -51,7 +51,7 @@ export async function submitInterviewTurn(
 export async function fetchInterviewReport(
   sessionId: string
 ): Promise<InterviewReportResponse> {
-  return apiClient<InterviewReportResponse>(`/interview/${sessionId}`, {
+  return apiClient<InterviewReportResponse>(`/interview/${sessionId}/report`, {
     method: "GET",
   });
 }
