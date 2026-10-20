@@ -13,7 +13,7 @@ class GeminiProvider(LLMProvider):
     Uses gemini-2.5-flash / gemini-1.5-flash for Socratic dialog and text-embedding-004 / gemini-embedding-001 for 768-dim temporal retrieval.
     """
 
-    GEN_MODEL = "gemini-1.5-flash"
+    GEN_MODEL = "gemini-1.5-flash-latest"
     EMBED_MODEL = "gemini-embedding-001"
     BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 

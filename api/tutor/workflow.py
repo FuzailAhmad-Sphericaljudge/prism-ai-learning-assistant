@@ -199,7 +199,32 @@ class TutorWorkflow:
 
     def _call_provider(self, system_prompt: str, prompt: str) -> str:
         try:
-            return self.provider.generate(prompt=prompt, system_instruction=system_prompt)
+            import inspect
+            import asyncio
+            import concurrent.futures
+
+            gen_call = self.provider.generate(prompt=prompt, system_prompt=system_prompt)
+            if inspect.isawaitable(gen_call):
+                try:
+                    loop = asyncio.get_running_loop()
+                except RuntimeError:
+                    loop = None
+
+                if loop and loop.is_running():
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                        res = executor.submit(
+                            lambda: asyncio.run(
+                                self.provider.generate(prompt=prompt, system_prompt=system_prompt)
+                            )
+                        ).result(timeout=15.0)
+                else:
+                    res = asyncio.run(self.provider.generate(prompt=prompt, system_prompt=system_prompt))
+            else:
+                res = gen_call
+
+            if hasattr(res, "content"):
+                return res.content
+            return str(res)
         except Exception as e:
             logger.warning(f"LLM provider failed: {e}. Generating deterministic grounded fallback.")
             return json.dumps({
