@@ -21,6 +21,12 @@ from api.schemas.retrieve import (
     AdmittedChunkDebug,
     BlockedChunkDebug,
 )
+from api.schemas.chat import (
+    ChatRequest,
+    ChatResponse,
+    CitationItem,
+    DiagnosticCheck,
+)
 
 __all__ = [
     "CourseCreate",
@@ -38,4 +44,8 @@ __all__ = [
     "RetrieveDebugResponse",
     "AdmittedChunkDebug",
     "BlockedChunkDebug",
+    "ChatRequest",
+    "ChatResponse",
+    "CitationItem",
+    "DiagnosticCheck",
 ]
