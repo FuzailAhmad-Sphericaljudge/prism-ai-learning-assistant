@@ -10,7 +10,7 @@ export const Footer: React.FC = () => {
         {/* Brand info */}
         <div className="flex flex-col items-center md:items-start gap-2">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-gradient-to-tr from-prism-cyan to-prism-violet p-[1px]">
+            <div className="h-6 w-6 rounded-lg bg-gradient-to-tr from-prism-cyan via-prism-violet to-prism-pink p-[1px]">
               <div className="h-full w-full bg-[#07080D] rounded-[7px] flex items-center justify-center">
                 <Sparkles className="h-3 w-3 text-prism-cyan" />
               </div>
@@ -23,8 +23,7 @@ export const Footer: React.FC = () => {
             </span>
           </div>
           <p className="text-xs text-foreground-muted text-center md:text-left max-w-md">
-            Built with precision by Team <strong className="text-foreground">The Falcons</strong> for Hackathon 2026.
-            Zero spoilers, exact temporal grounding.
+            Architected by Team <strong className="text-white">The Falcons</strong> (<strong className="text-prism-cyan">Fuzail Ahmad</strong> & <strong className="text-prism-pink">Lakshya Garg</strong>) for Hackathon 2026. Zero spoilers, exact temporal grounding.
           </p>
         </div>
 
