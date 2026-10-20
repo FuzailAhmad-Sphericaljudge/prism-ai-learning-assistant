@@ -122,8 +122,8 @@ def check_database() -> bool:
             else:
                 print(f"[FAIL] pgvector: Extension 'vector' is NOT enabled in database. Run: CREATE EXTENSION IF NOT EXISTS vector;")
                 return False
-    except ImportError:
-        print("[FAIL] DATABASE_URL: sqlalchemy or psycopg2-binary not installed in Python environment")
+    except ImportError as exc:
+        print(f"[FAIL] DATABASE_URL: Import error: {exc}")
         return False
     except Exception as exc:
         print(f"[FAIL] DATABASE_URL ({masked}): Connection error: {exc}")
@@ -149,3 +149,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
