@@ -6,10 +6,18 @@ import { usePlayerStore, RightPanelTab } from "@/lib/stores/use-player-store";
 import { ChatTabPanel } from "@/components/chat/chat-tab-panel";
 import { ResourcesTabPanel } from "@/components/resources/resources-tab-panel";
 import { EvidenceInspectorTabPanel } from "@/components/evidence/evidence-inspector-tab-panel";
+import { EvidenceInspectorDrawer } from "@/components/evidence/evidence-inspector-drawer";
 
-export const RightTabbedPanel: React.FC = () => {
+interface RightTabbedPanelProps {
+  courseId?: string;
+}
+
+export const RightTabbedPanel: React.FC<RightTabbedPanelProps> = ({
+  courseId = "00000000-0000-0000-0000-000000000002",
+}) => {
   const activeRightTab = usePlayerStore((s) => s.activeRightTab);
-  const setRightTab = usePlayerStore((s) => s.setRightTab);
+  const setRightTab = usePlayerStore((s) => s.setActiveRightTab);
+  const isEvidenceDrawerOpen = usePlayerStore((s) => s.isEvidenceDrawerOpen);
 
   const tabs: { id: RightPanelTab; label: string; icon: React.ElementType; badge?: string }[] = [
     { id: "ask", label: "Ask PRISM", icon: MessageSquare, badge: "AI" },
@@ -70,10 +78,18 @@ export const RightTabbedPanel: React.FC = () => {
       </div>
 
       {/* Main Tab Panel Content */}
-      <div className="flex-1 overflow-hidden">
-        {activeRightTab === "ask" && <ChatTabPanel />}
+      <div className="flex-1 overflow-hidden relative">
+        {activeRightTab === "ask" && <ChatTabPanel courseId={courseId} />}
         {activeRightTab === "resources" && <ResourcesTabPanel />}
-        {activeRightTab === "evidence" && <EvidenceInspectorTabPanel />}
+        {activeRightTab === "evidence" && (
+          isEvidenceDrawerOpen ? (
+            <div className="h-full overflow-y-auto p-2">
+              <EvidenceInspectorDrawer courseId={courseId} />
+            </div>
+          ) : (
+            <EvidenceInspectorTabPanel />
+          )
+        )}
       </div>
     </div>
   );
