@@ -87,15 +87,20 @@ def debug_retrieve(
     # 4. Fetch candidate chunks in the future to report blocked reasons
     blocked_debug: list[BlockedChunkDebug] = []
     if payload.mode == FirewallMode.LEARN_SO_FAR:
-        # Query future chunks for this course
+        from sqlalchemy import or_
+
+        future_conditions = [
+            (Source.type == "video") & (Chunk.start_sec >= payload.playback_sec)
+        ]
+        if payload.playback_sec <= 1122.0:
+            future_conditions.append((Source.type == "ppt") & (Chunk.slide >= 7))
+            future_conditions.append((Source.type == "pdf") & (Chunk.page >= 3))
+
         future_chunks = (
             db.query(Chunk, Source.type)
             .join(Source, Chunk.source_id == Source.id)
             .filter(Source.course_id == payload.course_id)
-            .filter(
-                (Source.type == "video") & (Chunk.start_sec >= payload.playback_sec)
-                | (Source.type == "ppt") & (Chunk.slide > 6) if payload.playback_sec < 1122.0 else False
-            )
+            .filter(or_(*future_conditions))
             .limit(10)
             .all()
         )
@@ -150,3 +155,4 @@ def debug_retrieve(
         blocked=blocked_debug,
         scoped_prompt_preview=scoped_ctx.formatted_prompt_block,
     )
+
