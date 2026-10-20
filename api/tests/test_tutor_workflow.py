@@ -82,3 +82,63 @@ def test_tutor_workflow_triggers_not_covered_yet_on_downstream_concept():
     assert resp.available_at_sec == 1122.0
     assert "Topic Not Covered Yet" in resp.answer
     assert resp.check is not None
+
+
+def test_tutor_workflow_triggers_not_covered_yet_on_avl_rotation():
+    """Tests that querying AVL rotations at 1200s (< 25:30) triggers 'not covered yet'."""
+    mock_db = MagicMock()
+    workflow = TutorWorkflow()
+
+    req = ChatRequest(
+        query="Explain how AVL tree double rotations work.",
+        course_id="c1",
+        playback_sec=1200.0,
+        mode=FirewallMode.LEARN_SO_FAR,
+    )
+
+    resp = workflow.execute(req, db=mock_db)
+
+    assert resp.is_not_covered is True
+    assert "AVL" in resp.not_covered_topic
+    assert resp.available_at_sec == 1530.0
+
+
+def test_tutor_workflow_explore_ahead_bypasses_future_restriction():
+    """In explore_ahead mode, downstream queries proceed to retrieval."""
+    mock_db = MagicMock()
+    mock_retriever = MagicMock()
+    c_del = ScoredCandidate(
+        chunk_id="c-del",
+        source_id="s1",
+        source_type="video",
+        text="Case 3: Replace node with successor.",
+        start_sec=1150.0,
+        end_sec=1200.0,
+    )
+    mock_retriever.retrieve.return_value = RetrievalResult(
+        query="How do we delete?",
+        course_id="c1",
+        playback_sec=500.0,
+        mode=FirewallMode.EXPLORE_AHEAD,
+        admitted_candidates=[c_del],
+    )
+
+    workflow = TutorWorkflow(retriever=mock_retriever)
+    workflow.provider.generate = MagicMock(return_value=json.dumps({
+        "answer": "Under explore ahead mode, deletion replaces z with successor [E1].",
+        "citations": [{"evidence_id": "E1", "quote": "Replace node with successor"}],
+        "diagnostic_check": {"question": "What is replaced?", "options": ["Successor", "Parent"], "correct_index": 0, "explanation": "Successor"},
+        "is_not_covered": False,
+    }))
+
+    req = ChatRequest(
+        query="How do we delete?",
+        course_id="c1",
+        playback_sec=500.0,
+        mode=FirewallMode.EXPLORE_AHEAD,
+    )
+
+    resp = workflow.execute(req, db=mock_db)
+    assert resp.is_not_covered is False
+    assert len(resp.citations) == 1
+
