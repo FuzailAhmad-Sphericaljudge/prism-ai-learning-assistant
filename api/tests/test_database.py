@@ -1,12 +1,13 @@
-import pytest
 from pathlib import Path
 from dotenv import load_dotenv
-from api.database import verify_database_connection, get_db, SessionLocal
 
-# Ensure api/.env is loaded for tests
+# Ensure api/.env is loaded before importing database modules
 ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
 if ENV_PATH.exists():
     load_dotenv(ENV_PATH)
+
+import pytest
+from api.database import verify_database_connection, get_db, SessionLocal
 
 
 def test_verify_database_connection():
