@@ -250,7 +250,7 @@ export const NotesViewer: React.FC = () => {
               <strong className="text-white">Case 2 (Single Child):</strong> Splice z out by directly linking parent(z) to child(z). Cost: O(1).
             </div>
             <div className="p-3 rounded-lg bg-black/40 border border-white/[0.06]">
-              <strong className="text-white">Case 3 (Two Children):</strong> Find z's successor y = tree_minimum(z.right). Splice y out from its original location and substitute y into z's place. Cost: O(h).
+              <strong className="text-white">Case 3 (Two Children):</strong> Find z&apos;s successor y = tree_minimum(z.right). Splice y out from its original location and substitute y into z&apos;s place. Cost: O(h).
             </div>
           </div>
         </section>

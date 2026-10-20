@@ -16,7 +16,8 @@
     "verify:landing": "python scripts/verify_landing.py",
     "verify:phase3": "python scripts/verify_phase3.py",
     "verify:phase4": "python scripts/verify_phase4.py",
-    "verify:phase5": "python scripts/verify_phase5.py"
+    "verify:phase5": "python scripts/verify_phase5.py",
+    "verify:phase6": "python scripts/verify_phase6.py"
   },
   "keywords": [
     "education",

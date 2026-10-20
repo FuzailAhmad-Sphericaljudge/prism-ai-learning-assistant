@@ -27,6 +27,8 @@ export function formatTimestamp(seconds: number): string {
     .padStart(2, "0")}`;
 }
 
+export const formatTime = formatTimestamp;
+
 /**
  * Formats a citation source string into readable badge text.
  */

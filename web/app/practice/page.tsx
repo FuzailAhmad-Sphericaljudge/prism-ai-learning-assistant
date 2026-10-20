@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/app/app-shell";
 import { PracticeConceptFilter } from "@/components/practice/practice-concept-filter";
@@ -73,7 +73,7 @@ export default function PracticePage() {
   }, []);
 
   // Fetch or generate questions when concept or type changes
-  const loadQuestions = async (concept: string | null = selectedConcept) => {
+  const loadQuestions = useCallback(async (concept: string | null = selectedConcept) => {
     setIsLoading(true);
     setCurrentFeedback(null);
     try {
@@ -98,11 +98,11 @@ export default function PracticePage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedConcept, playbackSec, mode, questionType]);
 
   useEffect(() => {
     loadQuestions(selectedConcept);
-  }, [selectedConcept, questionType, mode]);
+  }, [loadQuestions, selectedConcept]);
 
   const handleConceptSelect = (concept: string | null) => {
     setSelectedConcept(concept);

@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { FirewallMode, CitationItem, RetrieveDebugResponse } from "@/lib/api-types";
 
+export type ResourcesSubTab = "slides" | "pdf" | "notes";
+export type RightPanelTab = "ask" | "resources" | "evidence";
+
 export interface PlayerState {
   // Playback state
   currentTime: number;
@@ -42,9 +45,12 @@ export interface PlayerState {
   pauseAndSnapshot: () => number;
 
   setActiveRightTab: (tab: "ask" | "resources" | "evidence") => void;
+  setRightTab: (tab: "ask" | "resources" | "evidence") => void;
   setResourcesSubTab: (subTab: "slides" | "pdf" | "notes") => void;
   jumpToSlide: (slide: number) => void;
+  setActiveSlide: (slide: number) => void;
   jumpToPage: (page: number) => void;
+  setActivePdfPage: (page: number) => void;
 
   openEvidenceInspector: (citation: CitationItem, query?: string) => void;
   closeEvidenceInspector: () => void;
@@ -120,6 +126,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   setActiveRightTab: (activeRightTab) => set({ activeRightTab }),
+  setRightTab: (activeRightTab) => set({ activeRightTab }),
 
   setResourcesSubTab: (resourcesSubTab) => set({ resourcesSubTab }),
 
@@ -130,6 +137,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       resourcesSubTab: "slides",
     });
   },
+  setActiveSlide: (activeSlide: number) => set({ activeSlide: Math.max(1, activeSlide) }),
 
   jumpToPage: (activePdfPage: number) => {
     set({
@@ -138,6 +146,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       resourcesSubTab: "pdf",
     });
   },
+  setActivePdfPage: (activePdfPage: number) => set({ activePdfPage: Math.max(1, activePdfPage) }),
 
   openEvidenceInspector: (citation: CitationItem, query?: string) => {
     set({

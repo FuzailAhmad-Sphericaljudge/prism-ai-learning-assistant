@@ -99,7 +99,7 @@ export function MasteryEvidenceTimeline({
                   {item.question_text}
                 </p>
                 <p className="text-xs text-zinc-400 font-mono">
-                  Student Answer: <span className="text-zinc-200">"{item.user_answer}"</span>
+                  Student Answer: <span className="text-zinc-200">&ldquo;{item.user_answer}&rdquo;</span>
                 </p>
               </div>
 

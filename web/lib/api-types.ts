@@ -16,6 +16,7 @@ export interface Course {
 }
 
 export interface TranscriptCue {
+  id?: string;
   text: string;
   start_sec: number;
   end_sec: number;

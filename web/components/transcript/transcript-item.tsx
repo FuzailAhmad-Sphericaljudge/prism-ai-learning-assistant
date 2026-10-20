@@ -81,7 +81,9 @@ export const TranscriptItem: React.FC<TranscriptItemProps> = ({
       {/* Right Lock / Play status icon */}
       <div className="flex-shrink-0 pt-0.5">
         {isLocked ? (
-          <Lock className="h-3.5 w-3.5 text-slate-500" title="Locked by Temporal Firewall" />
+          <span title="Locked by Temporal Firewall">
+            <Lock className="h-3.5 w-3.5 text-slate-500" />
+          </span>
         ) : isActive ? (
           <Play className="h-3.5 w-3.5 text-prism-cyan fill-prism-cyan animate-pulse" />
         ) : null}
