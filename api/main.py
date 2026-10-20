@@ -17,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.config import Settings, get_settings
 from api.middleware.request_id import RequestIdMiddleware
 from api.middleware.logging import StructuredLoggingMiddleware
-from api.routers import health, courses, sources
+from api.routers import health, courses, sources, sessions, retrieve
 
 # Setup logging format
 logging.basicConfig(
@@ -70,6 +70,8 @@ def create_app(settings: Settings = None) -> FastAPI:
     app.include_router(health.router)
     app.include_router(courses.router)
     app.include_router(sources.router)
+    app.include_router(sessions.router)
+    app.include_router(retrieve.router)
 
     # 4. Root Welcome Route
     @app.get("/", tags=["System"])
