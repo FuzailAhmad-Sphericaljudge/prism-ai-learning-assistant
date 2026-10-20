@@ -48,7 +48,7 @@ const NAV_ITEMS: NavItem[] = [
     label: "Mastery",
     href: "/mastery",
     icon: BarChart3,
-    badge: "92%",
+    badge: "Live",
     activeColor: "text-prism-pink bg-prism-pink/10 border-prism-pink/30",
   },
   {
