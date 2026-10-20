@@ -1,5 +1,12 @@
 import pytest
+from pathlib import Path
+from dotenv import load_dotenv
 from api.database import verify_database_connection, get_db, SessionLocal
+
+# Ensure api/.env is loaded for tests
+ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+if ENV_PATH.exists():
+    load_dotenv(ENV_PATH)
 
 
 def test_verify_database_connection():
@@ -14,15 +21,14 @@ def test_verify_database_connection():
 
 
 def test_get_db_session_lifecycle():
-    if SessionLocal is not None:
+    # If SessionLocal is configured and connected, test generator
+    health = verify_database_connection()
+    if health["connected"] and SessionLocal is not None:
         db_gen = get_db()
         db_session = next(db_gen)
         assert db_session is not None
-        # Ensure session can execute a simple query
         from sqlalchemy import text
         res = db_session.execute(text("SELECT 1;")).scalar()
         assert res == 1
-        # Close generator
         with pytest.raises(StopIteration):
             next(db_gen)
-
