@@ -10,10 +10,10 @@
 | Layer | Service | Provider | Region | Production URL / Endpoint | Purpose |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Code Repository** | GitHub | GitHub | Global | `https://github.com/FuzailAhmad-Sphericaljudge/prism-ai-learning-assistant` | Source control, CI/CD Actions |
-| **Web Frontend** | Vercel | Vercel | Global CDN | `https://prism-ai-learning-assistant.vercel.app` (or assigned vercel.app domain) | Next.js 14 App Router SSR + UI |
-| **API Backend** | Render | Render | Oregon / Frankfurt | `https://prism-api.onrender.com` | FastAPI server, Temporal Firewall engine |
-| **Vector & RDBMS** | Supabase | Supabase (AWS) | Mumbai (`ap-south-1`) | `db.<ref>.supabase.co:5432/postgres` | PostgreSQL 15+ with `pgvector` extension |
-| **LLM & Embeddings** | Gemini AI | Google AI Studio | Global | `models/gemini-1.5-flash`, `models/text-embedding-004` | Socratic answers, rubric scoring, embeddings |
+| **Web Frontend** | Vercel | Vercel | Global CDN | `https://web-one-blue-mbb8ovavhb.vercel.app` | Next.js 14 App Router SSR + UI |
+| **API Backend** | Render | Render | Oregon | `https://prism-api-z7c9.onrender.com` | FastAPI server, Temporal Firewall engine |
+| **Vector & RDBMS** | Supabase | Supabase (AWS) | Tokyo (`ap-northeast-1`) | `aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres` | PostgreSQL 17.11 with `pgvector 0.8.2` |
+| **LLM & Embeddings** | Gemini AI | Google AI Studio | Global | `models/gemini-3.5-flash-lite`, `models/gemini-embedding-001` | Socratic answers, rubric scoring, 3072-dim embeddings |
 
 ---
 
@@ -25,16 +25,17 @@
 - `APP_NAME`: `PRISM API`
 - `APP_ENV`: `production`
 - `DEBUG`: `false`
-- `PORT`: `8000`
+- `PYTHON_VERSION`: `3.11.9`
+- `PYTHONPATH`: `..`
 - `LLM_PROVIDER`: `gemini` (or `mock` for fallback)
 - `GEMINI_API_KEY`: Google AI Studio API key
-- `DATABASE_URL`: Supabase Session Pooler connection URI (`postgresql://postgres:[PASSWORD]@...:5432/postgres`)
-- `CORS_ORIGINS`: JSON array of allowed origins (e.g. `["https://prism-ai-learning-assistant.vercel.app","http://localhost:3000"]`)
+- `DATABASE_URL`: Supabase Session Pooler connection URI (`postgresql://postgres.qhqoyhqkqfoqcgcaposk:[PASSWORD]@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres`)
+- `CORS_ORIGINS`: `https://web-one-blue-mbb8ovavhb.vercel.app,http://localhost:3000`
 
 ### 2. Vercel Dashboard (`/web`)
 - `NEXT_PUBLIC_APP_NAME`: `PRISM`
 - `NEXT_PUBLIC_APP_VERSION`: `0.1.0`
-- `NEXT_PUBLIC_API_URL`: Render production backend URL (e.g. `https://prism-api.onrender.com`)
+- `NEXT_PUBLIC_API_URL`: `https://prism-api-z7c9.onrender.com`
 - `NEXT_PUBLIC_ENABLE_DEMO_MOCK`: `true`
 
 ---
