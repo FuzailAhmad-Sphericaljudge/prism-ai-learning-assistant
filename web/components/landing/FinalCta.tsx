@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { ArrowRight, Sparkles, Play, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Sparkles, Play, ShieldCheck, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlowBorder } from "@/components/prism/GlowBorder";
 import { GradientText } from "@/components/prism/GradientText";
@@ -67,11 +68,11 @@ export const FinalCta: React.FC = () => {
                 asChild
                 className="shadow-prism-glow text-sm font-semibold px-8 py-6"
               >
-                <a href="#firewall-demo" className="flex items-center gap-2">
+                <Link href="/learn/00000000-0000-0000-0000-000000000002" className="flex items-center gap-2">
                   <Play className="h-4 w-4 fill-current text-white" />
-                  <span>Try Temporal Firewall Demo</span>
+                  <span>Launch Live Course Workspace</span>
                   <ArrowRight className="h-4 w-4" />
-                </a>
+                </Link>
               </Button>
 
               <Button
@@ -80,10 +81,10 @@ export const FinalCta: React.FC = () => {
                 asChild
                 className="border-white/10 text-sm font-semibold px-8 py-6 hover:bg-white/10 transition-colors"
               >
-                <a href="/design" className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-prism-violet" />
-                  <span>Explore Design Kitchen Sink</span>
-                </a>
+                <Link href="/app" className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-prism-cyan" />
+                  <span>Browse Course Library</span>
+                </Link>
               </Button>
             </div>
           </div>

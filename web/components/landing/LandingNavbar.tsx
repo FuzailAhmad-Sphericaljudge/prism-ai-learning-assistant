@@ -13,6 +13,7 @@ interface NavAnchor {
 }
 
 const LANDING_NAV_LINKS: NavAnchor[] = [
+  { label: "Course App", href: "/app" },
   { label: "Firewall Demo", href: "#firewall-demo" },
   { label: "Features", href: "#features" },
   { label: "How It Works", href: "#how-it-works" },
@@ -125,10 +126,10 @@ export const LandingNavbar: React.FC = () => {
             asChild
             className="shadow-prism-glow text-xs font-semibold px-4"
           >
-            <a href="#firewall-demo" className="flex items-center gap-1.5">
+            <Link href="/learn/00000000-0000-0000-0000-000000000002" className="flex items-center gap-1.5">
               <span>Try the demo</span>
               <ArrowRight className="h-3.5 w-3.5" />
-            </a>
+            </Link>
           </Button>
         </div>
 
@@ -169,14 +170,14 @@ export const LandingNavbar: React.FC = () => {
               asChild
               className="w-full justify-center shadow-prism-glow"
             >
-              <a
-                href="#firewall-demo"
+              <Link
+                href="/learn/00000000-0000-0000-0000-000000000002"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center justify-center gap-2"
               >
                 <span>Try the demo</span>
                 <ArrowRight className="h-4 w-4" />
-              </a>
+              </Link>
             </Button>
           </div>
         </div>

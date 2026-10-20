@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { ArrowRight, Sparkles, Shield, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GradientText } from "@/components/prism/GradientText";
@@ -45,11 +46,11 @@ export const HeroSection: React.FC = () => {
             asChild
             className="shadow-prism-glow text-sm font-semibold px-6 py-6"
           >
-            <a href="#firewall-demo" className="flex items-center gap-2">
+            <Link href="/learn/00000000-0000-0000-0000-000000000002" className="flex items-center gap-2">
               <Play className="h-4 w-4 fill-current text-white" />
-              <span>Launch Interactive Demo</span>
+              <span>Launch Live Learning App</span>
               <ArrowRight className="h-4 w-4" />
-            </a>
+            </Link>
           </Button>
 
           <Button
