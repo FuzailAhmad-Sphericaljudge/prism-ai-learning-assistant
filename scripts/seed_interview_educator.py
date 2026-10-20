@@ -22,7 +22,7 @@ sys.path.insert(0, str(ROOT))
 from api.database import SessionLocal
 from api.models.user import User
 from api.models.course import Course
-from api.models.chat import Session, Message
+from api.models.session import Session, Message
 from api.models.interview import InterviewSession, InterviewExchange
 from api.models.mastery import Attempt
 
@@ -55,7 +55,7 @@ def seed_interview_and_educator():
             InterviewSession.user_id == DEMO_USER_ID,
         ).all()
         for session in existing_interviews:
-            db.query(InterviewExchange).filter(InterviewExchange.session_id == session.id).delete()
+            db.query(InterviewExchange).filter(InterviewExchange.interview_session_id == session.id).delete()
             db.delete(session)
         db.commit()
 
@@ -195,6 +195,7 @@ def seed_interview_and_educator():
             id=session_id_1,
             course_id=DEMO_COURSE_ID,
             user_id=DEMO_USER_ID,
+            target_concept="Binary Search Trees & Structural Invariants",
             role="Systems Software Engineer",
             topic="Binary Search Trees & Structural Invariants",
             current_round=3,
@@ -212,10 +213,10 @@ def seed_interview_and_educator():
             db.add(
                 InterviewExchange(
                     id=str(uuid.uuid4()),
-                    session_id=session_id_1,
+                    interview_session_id=session_id_1,
                     round_number=ex["round"],
-                    question=ex["question"],
-                    answer=ex["answer"],
+                    question_text=ex["question"],
+                    learner_response=ex["answer"],
                     justification=ex["justification"],
                     evaluation=ex["evaluation"],
                     created_at=now - timedelta(hours=3, minutes=-(ex["round"] * 5)),
@@ -286,6 +287,7 @@ def seed_interview_and_educator():
             id=session_id_2,
             course_id=DEMO_COURSE_ID,
             user_id=DEMO_USER_ID,
+            target_concept="Balanced Trees & Algorithmic Complexity",
             role="Algorithm Specialist",
             topic="Balanced Trees & Algorithmic Complexity",
             current_round=2,
@@ -302,10 +304,10 @@ def seed_interview_and_educator():
             db.add(
                 InterviewExchange(
                     id=str(uuid.uuid4()),
-                    session_id=session_id_2,
+                    interview_session_id=session_id_2,
                     round_number=ex["round"],
-                    question=ex["question"],
-                    answer=ex["answer"],
+                    question_text=ex["question"],
+                    learner_response=ex["answer"],
                     justification=ex["justification"],
                     evaluation=ex["evaluation"],
                     created_at=now - timedelta(days=1),
@@ -327,7 +329,7 @@ def seed_interview_and_educator():
                 id="00000000-0000-0000-0000-000000000099",
                 course_id=DEMO_COURSE_ID,
                 user_id=DEMO_USER_ID,
-                playback_sec=1200.0,
+                current_playback_sec=1200.0,
                 mode="learn_so_far",
                 created_at=now - timedelta(days=2),
                 updated_at=now,
@@ -360,7 +362,7 @@ def seed_interview_and_educator():
                         session_id=chat_session.id,
                         role="user",
                         content=q_text,
-                        timestamp_sec=t_sec,
+                        playback_sec=t_sec,
                         created_at=now - timedelta(hours=4),
                     )
                 )
