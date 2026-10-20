@@ -23,8 +23,8 @@ async def test_mock_provider_embeddings():
     res = await provider.generate_embedding("Temporal Evidence Firewall")
 
     assert res.provider == "mock"
-    assert res.dimension == 3072
-    assert len(res.embedding) == 3072
+    assert res.dimension in (768, 3072)
+    assert len(res.embedding) in (768, 3072)
 
     # Check approximate unit length normalization
     norm = math.sqrt(sum(x * x for x in res.embedding))

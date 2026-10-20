@@ -15,6 +15,11 @@ class MockProvider(LLMProvider):
 
     # Cached responses keyed by prompt pattern
     CACHED_RESPONSES = {
+        "attention": (
+            "Based strictly on the content covered up to this timestamp in the lecture, "
+            "the query-key attention scores represent raw dot-product affinities. "
+            "Softmax normalization scales these values into a valid probability distribution."
+        ),
         "bst": (
             "Based strictly on the content covered up to this timestamp in the lecture, "
             "a Binary Search Tree satisfies the invariant that every node in the left subtree "
@@ -59,7 +64,9 @@ class MockProvider(LLMProvider):
         self, prompt: str, system_prompt: Optional[str] = None, max_tokens: int = 1024
     ) -> ProviderResult:
         prompt_lower = prompt.lower()
-        if "bst" in prompt_lower or "binary search tree" in prompt_lower:
+        if "attention" in prompt_lower:
+            content = self.CACHED_RESPONSES["attention"]
+        elif "bst" in prompt_lower or "binary search tree" in prompt_lower:
             content = self.CACHED_RESPONSES["bst"]
         elif "firewall" in prompt_lower or "timestamp" in prompt_lower or "temporal" in prompt_lower:
             content = self.CACHED_RESPONSES["temporal"]

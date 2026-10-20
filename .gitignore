@@ -64,3 +64,8 @@ desktop.ini
 
 # Vercel & Cloud deployment artifacts
 .vercel
+
+# Uploads & Temporary Media
+uploads/
+api/uploads/
+

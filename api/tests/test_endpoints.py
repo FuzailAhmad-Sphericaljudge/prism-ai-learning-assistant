@@ -1,13 +1,15 @@
 import io
+import uuid
 import pytest
 from fastapi.testclient import TestClient
 
 
 def test_course_endpoints_lifecycle(client: TestClient):
+    unique_code = f"CS-TEST-{uuid.uuid4().hex[:6].upper()}"
     # 1. Create a course
     create_payload = {
         "title": "Algorithms & Abstract Data Types",
-        "code": "CS-TEST-101",
+        "code": unique_code,
         "description": "Integration testing course for PRISM API.",
         "instructor": "Prof. Test Falcon",
         "term": "Fall 2026",
@@ -15,7 +17,7 @@ def test_course_endpoints_lifecycle(client: TestClient):
     res = client.post("/courses", json=create_payload)
     assert res.status_code == 201
     course_data = res.json()
-    assert course_data["code"] == "CS-TEST-101"
+    assert course_data["code"] == unique_code
     course_id = course_data["id"]
 
     # 2. List courses
