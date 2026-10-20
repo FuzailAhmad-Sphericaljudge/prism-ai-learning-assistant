@@ -61,3 +61,58 @@ def test_validator_detects_future_temporal_violation():
 
     assert res.is_valid is False
     assert res.unsupported_claims_flagged is True
+
+
+def test_validator_passes_fully_supported_grounded_answer():
+    validator = OutputValidator()
+
+    admitted = [
+        ScopedEvidenceItem(
+            evidence_id="E1",
+            chunk_id="c1",
+            source_type="video",
+            coordinate="05:00 - 06:00",
+            start_sec=300.0,
+            end_sec=360.0,
+            text="Grounded BST invariant explanation.",
+            estimated_tokens=20,
+        ),
+        ScopedEvidenceItem(
+            evidence_id="E2",
+            chunk_id="c2",
+            source_type="ppt",
+            coordinate="Slide 3",
+            slide=3,
+            text="Slide invariant definition.",
+            estimated_tokens=20,
+        ),
+    ]
+
+    answer = "The binary search tree maintains invariant [E1], which is reinforced on Slide 3 [E2]."
+    res = validator.validate(
+        answer_text=answer,
+        admitted_evidence=admitted,
+        playback_sec=500.0,
+        mode=FirewallMode.LEARN_SO_FAR,
+    )
+
+    assert res.is_valid is True
+    assert res.unsupported_claims_flagged is False
+    assert set(res.detected_citation_ids) == {"E1", "E2"}
+
+
+def test_validator_passes_not_covered_yet_state():
+    validator = OutputValidator()
+
+    answer = "This topic has not been covered yet up to 18:42 in this lecture."
+    res = validator.validate(
+        answer_text=answer,
+        admitted_evidence=[],
+        playback_sec=1122.0,
+        mode=FirewallMode.LEARN_SO_FAR,
+        is_not_covered=True,
+    )
+
+    assert res.is_valid is True
+    assert res.unsupported_claims_flagged is False
+
