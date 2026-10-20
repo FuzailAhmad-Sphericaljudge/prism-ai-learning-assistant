@@ -293,3 +293,159 @@ export interface MasteryTimelineResponse {
   total_attempts: number;
   timeline: TimelineAttemptItem[];
 }
+
+// ==========================================
+// PHASE 7: INTERVIEW & ORAL DEFENSE CONTRACTS
+// ==========================================
+
+export interface RubricCriterion {
+  id: string;
+  name: string;
+  description: string;
+  weight: number;
+  expected_points: string[];
+  linked_evidence: CitationItem[];
+  score?: number | null;
+  justification?: string | null;
+}
+
+export interface InterviewRubric {
+  criteria: RubricCriterion[];
+  passing_score: number;
+}
+
+export interface InterviewStartRequest {
+  course_id: string;
+  user_id?: string;
+  role: string;
+  topic: string;
+  max_rounds?: number;
+}
+
+export interface InterviewStartResponse {
+  session_id: string;
+  course_id: string;
+  user_id: string;
+  role: string;
+  topic: string;
+  current_round: number;
+  max_rounds: number;
+  initial_question: string;
+  rubric: RubricCriterion[];
+  status: string;
+}
+
+export interface TurnEvaluation {
+  criterion_id: string;
+  criterion_name: string;
+  score: number;
+  justification: string;
+  missed_points: string[];
+  demonstrated_points: string[];
+}
+
+export interface InterviewTurnRequest {
+  session_id: string;
+  user_answer: string;
+}
+
+export interface InterviewTurnResponse {
+  session_id: string;
+  round_number: number;
+  max_rounds: number;
+  is_completed: boolean;
+  evaluation?: TurnEvaluation | null;
+  rubric: RubricCriterion[];
+  next_question?: string | null;
+  justification?: string | null;
+  feedback?: string | null;
+}
+
+export interface CriterionReport {
+  criterion_id: string;
+  name: string;
+  score: number;
+  weight: number;
+  justification: string;
+  linked_evidence: CitationItem[];
+}
+
+export interface InterviewExchangeTranscript {
+  round: number;
+  question: string;
+  answer: string;
+  justification?: string | null;
+  evaluation?: TurnEvaluation | null;
+}
+
+export interface InterviewReportResponse {
+  session_id: string;
+  course_id: string;
+  user_id: string;
+  role: string;
+  topic: string;
+  status: string;
+  overall_score: number;
+  criteria_scores: CriterionReport[];
+  strengths: string[];
+  gaps: string[];
+  revision_links: RevisionAction[];
+  transcript: InterviewExchangeTranscript[];
+  created_at?: string | null;
+  completed_at?: string | null;
+}
+
+// ==========================================
+// PHASE 7: EDUCATOR ANALYTICS CONTRACTS
+// ==========================================
+
+export interface ConfusionHeatmapBucket {
+  bucket_index: number;
+  start_sec: number;
+  end_sec: number;
+  coordinate_label: string;
+  query_count: number;
+  misconception_count: number;
+  confusion_intensity: number;
+  most_confused_topic: string;
+}
+
+export interface TopMisconceptionItem {
+  misconception_tag: string;
+  concept_tag: string;
+  occurrences: number;
+  prevalence_percentage: number;
+  landmark_coordinate: string;
+  remediation_action: string;
+}
+
+export interface TopQuestionItem {
+  question: string;
+  occurrences: number;
+  concept_tag: string;
+  playback_coordinate: string;
+  timestamp_sec: number;
+}
+
+export interface ConceptMasteryDistribution {
+  concept_tag: string;
+  demonstrated_count: number;
+  improving_count: number;
+  gap_count: number;
+  unassessed_count: number;
+  average_score: number;
+}
+
+export interface EducatorInsightsResponse {
+  course_id: string;
+  total_questions_asked: number;
+  total_practice_attempts: number;
+  total_interviews: number;
+  active_students: number;
+  avg_course_mastery_percentage: number;
+  confusion_heatmap: ConfusionHeatmapBucket[];
+  top_misconceptions: TopMisconceptionItem[];
+  top_questions: TopQuestionItem[];
+  concept_distributions: ConceptMasteryDistribution[];
+}
+
