@@ -11,7 +11,9 @@
     "build:web": "npm run build --workspace=web",
     "lint:web": "npm run lint --workspace=web",
     "test:api": "pytest api",
-    "start:api": "uvicorn api.main:app --reload --port 8000"
+    "start:api": "uvicorn api.main:app --reload --port 8000",
+    "verify:env": "python scripts/check_env.py",
+    "verify:landing": "python scripts/verify_landing.py"
   },
   "keywords": [
     "education",
