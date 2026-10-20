@@ -17,6 +17,15 @@ import { PIPELINE_STAGES } from "./landing-data";
 
 export const HowItWorksPipeline: React.FC = () => {
   const [activeStep, setActiveStep] = React.useState<number>(2); // Default to Step 03 (Temporal Filter)
+  const [copied, setCopied] = React.useState<boolean>(false);
+
+  const handleCopy = () => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(STEP_PAYLOADS[activeStep].json);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const getStepIcon = (index: number) => {
     switch (index) {
@@ -237,7 +246,18 @@ export const HowItWorksPipeline: React.FC = () => {
                 <Code2 className="h-3.5 w-3.5 text-prism-violet" />
                 Live State Inspection ({STEP_PAYLOADS[activeStep].title})
               </span>
-              <span>FastAPI &bull; Pydantic Schema</span>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="px-2 py-0.5 rounded bg-white/[0.04] border border-white/10 hover:bg-white/10 text-[10px] text-foreground-muted hover:text-white transition-colors flex items-center gap-1"
+                aria-label="Copy JSON payload"
+              >
+                {copied ? (
+                  <span className="text-emerald-400 font-bold">✓ Copied!</span>
+                ) : (
+                  <span>Copy Payload</span>
+                )}
+              </button>
             </div>
             <pre className="p-4 rounded-xl bg-[#07080D] border border-white/[0.06] text-xs font-mono text-emerald-300 overflow-x-auto leading-relaxed shadow-inner">
               {STEP_PAYLOADS[activeStep].json}
