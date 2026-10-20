@@ -24,6 +24,10 @@ import { Badge } from "@/components/ui/badge";
 export const FeaturesBento: React.FC = () => {
   return (
     <section id="features" className="py-24 border-t border-white/[0.08] relative overflow-hidden bg-[#07080D]">
+      {/* Background ambient orbs */}
+      <div className="absolute top-1/3 -left-32 w-80 h-80 bg-prism-cyan/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-32 w-80 h-80 bg-prism-violet/5 rounded-full blur-3xl pointer-events-none" />
+
       <div className="container max-w-7xl mx-auto px-4 sm:px-8">
         <SectionHeading
           badge="Product Architecture"
