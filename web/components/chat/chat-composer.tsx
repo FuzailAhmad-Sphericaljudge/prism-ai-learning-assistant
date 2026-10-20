@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Send, Sparkles, Lock, Compass, CornerDownLeft } from "lucide-react";
+import { Send, Sparkles, Lock, Compass, Square, RotateCcw } from "lucide-react";
 import { usePlayerStore } from "@/lib/stores/use-player-store";
 import { formatTime } from "@/lib/utils";
 
@@ -10,6 +10,9 @@ interface ChatComposerProps {
   setInput: (val: string) => void;
   onSubmit: (text: string) => void;
   isLoading?: boolean;
+  onAbort?: () => void;
+  onRetry?: () => void;
+  hasError?: boolean;
 }
 
 export const ChatComposer: React.FC<ChatComposerProps> = ({
@@ -17,12 +20,19 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   setInput,
   onSubmit,
   isLoading = false,
+  onAbort,
+  onRetry,
+  hasError = false,
 }) => {
   const { currentTime, duration, firewallMode, pauseAndSnapshot } = usePlayerStore();
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    if (isLoading && onAbort) {
+      onAbort();
+      return;
+    }
     if (!input.trim() || isLoading) return;
     const textToSend = input.trim();
     setInput("");
@@ -86,14 +96,37 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
           className="flex-1 resize-none rounded-xl bg-white/[0.04] border border-white/[0.08] p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-prism-cyan/50 focus:ring-1 focus:ring-prism-cyan/50 transition-all font-sans"
         />
 
-        <button
-          type="submit"
-          disabled={!input.trim() || isLoading}
-          className="h-10 w-10 rounded-xl bg-gradient-to-tr from-prism-cyan via-prism-violet to-prism-pink hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-white shadow-prism-glow transition-all flex-shrink-0"
-          title="Send message (Enter)"
-        >
-          <Send className="h-4 w-4" />
-        </button>
+        {hasError && onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="h-10 px-3 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 text-rose-300 flex items-center gap-1.5 text-xs transition-all flex-shrink-0"
+            title="Retry last query"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>Retry</span>
+          </button>
+        )}
+
+        {isLoading ? (
+          <button
+            type="button"
+            onClick={onAbort}
+            className="h-10 w-10 rounded-xl bg-rose-500/20 border border-rose-500/40 hover:bg-rose-500/30 flex items-center justify-center text-rose-300 shadow-sm transition-all flex-shrink-0 animate-pulse"
+            title="Stop generating"
+          >
+            <Square className="h-4 w-4 fill-current" />
+          </button>
+        ) : (
+          <button
+            type="submit"
+            disabled={!input.trim()}
+            className="h-10 w-10 rounded-xl bg-gradient-to-tr from-prism-cyan via-prism-violet to-prism-pink hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-white shadow-prism-glow transition-all flex-shrink-0"
+            title="Send message (Enter)"
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        )}
       </form>
 
       <div className="flex items-center justify-between text-[10px] text-slate-500 px-1 mt-1.5 font-mono">
