@@ -126,3 +126,82 @@ async def get_course(
         updated_at=course.updated_at,
         source_count=len(course.sources),
     )
+
+
+@router.get(
+    "/{course_id}/transcript",
+    response_model=CourseTranscriptResponse,
+    summary="Get lecture transcript with Temporal Firewall boundary filtering",
+    description="Returns ordered transcript cues. If max_time_sec is passed, enforces temporal boundary cutoff and partial boundary truncation.",
+)
+async def get_course_transcript(
+    course_id: str,
+    max_time_sec: Optional[float] = Query(None, description="Optional temporal cutoff in seconds"),
+    db: AsyncSession = Depends(get_db),
+) -> CourseTranscriptResponse:
+    # 1. Verify course existence
+    c_stmt = select(Course).where(Course.id == course_id)
+    course = (await db.execute(c_stmt)).scalar_one_or_none()
+    if not course:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Course '{course_id}' not found.")
+
+    # 2. Find video/transcript source
+    s_stmt = (
+        select(Source)
+        .where(Source.course_id == course_id, Source.type.in_(["video", "transcript"]))
+        .order_by(Source.version.desc())
+    )
+    source = (await db.execute(s_stmt)).scalars().first()
+
+    if not source:
+        return CourseTranscriptResponse(
+            course_id=course_id,
+            source_id=None,
+            source_title=None,
+            total_cues=0,
+            duration_sec=0.0,
+            max_time_sec=max_time_sec,
+            cues=[],
+        )
+
+    # 3. Retrieve chunks with timestamps
+    q_chunks = (
+        select(Chunk)
+        .where(Chunk.source_id == source.id, Chunk.start_sec.isnot(None))
+        .order_by(Chunk.start_sec.asc())
+    )
+    chunks = (await db.execute(q_chunks)).scalars().all()
+
+    cues: List[TranscriptCueResponse] = []
+    for c in chunks:
+        start_sec = c.start_sec or 0.0
+        end_sec = c.end_sec or start_sec
+
+        # Temporal firewall cutoff: ignore any chunk starting strictly after max_time_sec
+        if max_time_sec is not None and start_sec > max_time_sec:
+            continue
+
+        # Boundary condition: if chunk spans across max_time_sec, truncate end_sec to max_time_sec
+        effective_end = end_sec
+        if max_time_sec is not None and end_sec > max_time_sec:
+            effective_end = max_time_sec
+
+        cues.append(
+            TranscriptCueResponse(
+                text=c.text,
+                start_sec=start_sec,
+                end_sec=effective_end,
+                speaker=None,
+            )
+        )
+
+    return CourseTranscriptResponse(
+        course_id=course_id,
+        source_id=source.id,
+        source_title=source.title,
+        total_cues=len(cues),
+        duration_sec=source.duration_sec or (chunks[-1].end_sec if chunks else 0.0),
+        max_time_sec=max_time_sec,
+        cues=cues,
+    )
+
