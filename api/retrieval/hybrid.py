@@ -7,7 +7,7 @@ from api.retrieval.rrf import reciprocal_rank_fusion
 from api.retrieval.reranker import BaseReranker, CrossEncoderHeuristicReranker
 from api.firewall.prefix_interpolator import interpolate_permitted_prefix
 from api.firewall.types import FirewallMode
-from api.providers.factory import get_llm_provider
+from api.providers.factory import get_provider
 
 
 class HybridRetriever:
@@ -25,7 +25,7 @@ class HybridRetriever:
 
     def __init__(self, reranker: Optional[BaseReranker] = None):
         self.reranker = reranker or CrossEncoderHeuristicReranker()
-        self.provider = get_llm_provider()
+        self.provider = get_provider()
 
     def retrieve(
         self,
