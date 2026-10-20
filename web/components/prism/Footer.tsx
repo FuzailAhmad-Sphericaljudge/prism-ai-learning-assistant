@@ -1,9 +1,17 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Sparkles, Heart } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/constants";
 
 export const Footer: React.FC = () => {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith("/app") || pathname?.startsWith("/learn")) {
+    return null;
+  }
   return (
     <footer className="w-full border-t border-white/[0.08] bg-[#07080D] py-12 px-4 sm:px-8">
       <div className="container max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">

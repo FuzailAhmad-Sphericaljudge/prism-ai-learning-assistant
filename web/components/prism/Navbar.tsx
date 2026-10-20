@@ -41,6 +41,11 @@ export const Navbar: React.FC<NavbarProps> = ({ apiStatus: propApiStatus }) => {
 
   const currentStatus = statusConfig[apiStatus];
 
+  // Hide landing navbar on workspace app & learning routes
+  if (pathname?.startsWith("/app") || pathname?.startsWith("/learn")) {
+    return null;
+  }
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-white/[0.08] bg-[#07080D]/85 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between px-4 sm:px-8 max-w-7xl mx-auto">
