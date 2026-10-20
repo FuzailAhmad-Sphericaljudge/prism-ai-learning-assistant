@@ -3,6 +3,7 @@ import shutil
 import logging
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks, status
+from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -162,4 +163,38 @@ async def get_source_status(
         error_message=source.error_message,
         version=source.version,
     )
+
+
+@router.get(
+    "/sources/{source_id}/file",
+    summary="Download raw course source file",
+    description="Streams original uploaded video/transcript, PDF, PPTX, or notes file.",
+)
+async def get_source_file(
+    source_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    s_stmt = select(Source).where(Source.id == source_id)
+    source = (await db.execute(s_stmt)).scalar_one_or_none()
+    if not source:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Source '{source_id}' not found.")
+
+    if not source.file_path or not os.path.exists(source.file_path):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found on server storage.")
+
+    media_type_map = {
+        "video": "text/vtt" if source.file_path.endswith(".vtt") else "video/mp4",
+        "pdf": "application/pdf",
+        "ppt": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "notes": "text/markdown",
+    }
+    media_type = media_type_map.get(source.type, "application/octet-stream")
+    filename = os.path.basename(source.file_path)
+
+    return FileResponse(
+        path=source.file_path,
+        media_type=media_type,
+        filename=filename,
+    )
+
 
