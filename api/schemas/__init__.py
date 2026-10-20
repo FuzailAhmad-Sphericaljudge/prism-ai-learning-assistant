@@ -42,6 +42,24 @@ from api.schemas.mastery import (
     TimelineAttemptItem,
     MasteryTimelineResponse,
 )
+from api.schemas.interview import (
+    RubricCriterion,
+    InterviewRubric,
+    InterviewStartRequest,
+    InterviewStartResponse,
+    TurnEvaluation,
+    InterviewTurnRequest,
+    InterviewTurnResponse,
+    CriterionReport,
+    InterviewReportResponse,
+)
+from api.schemas.educator import (
+    ConfusionHeatmapBucket,
+    TopMisconceptionItem,
+    TopQuestionItem,
+    ConceptMasteryDistribution,
+    EducatorInsightsResponse,
+)
 
 __all__ = [
     "CourseCreate",
@@ -74,4 +92,18 @@ __all__ = [
     "MasteryDashboardResponse",
     "TimelineAttemptItem",
     "MasteryTimelineResponse",
+    "RubricCriterion",
+    "InterviewRubric",
+    "InterviewStartRequest",
+    "InterviewStartResponse",
+    "TurnEvaluation",
+    "InterviewTurnRequest",
+    "InterviewTurnResponse",
+    "CriterionReport",
+    "InterviewReportResponse",
+    "ConfusionHeatmapBucket",
+    "TopMisconceptionItem",
+    "TopQuestionItem",
+    "ConceptMasteryDistribution",
+    "EducatorInsightsResponse",
 ]
