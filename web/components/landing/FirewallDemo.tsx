@@ -43,6 +43,20 @@ export const FirewallDemo: React.FC = () => {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
+  // Keyboard shortcut listener for timeline scrubbing
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (["INPUT", "TEXTAREA"].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === "ArrowLeft") {
+        setPlaybackSeconds((prev) => Math.max(0, prev - 30));
+      } else if (e.key === "ArrowRight") {
+        setPlaybackSeconds((prev) => Math.min(1800, prev + 30));
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
