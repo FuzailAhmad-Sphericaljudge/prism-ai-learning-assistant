@@ -39,7 +39,7 @@ class AdaptiveInterviewEngine:
         if active_criterion.id == "crit-01":
             # Invariant: left < root <= right, ancestral / recursive
             has_left_right = "left" in answer_lower and "right" in answer_lower
-            has_ancestral = any(w in answer_lower for w in ["ancest", "descendant", "global", "recursive", "all"])
+            has_ancestral = any(w in answer_lower for w in ["ancest", "descendant", "global", "recursive", "entire subtree", "every descendant"])
             has_pruning = any(w in answer_lower for w in ["prun", "search", "subtree", "branch"])
 
             if has_left_right:
