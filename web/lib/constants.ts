@@ -6,9 +6,11 @@ export const SITE_CONFIG = {
     "An AI learning assistant that prevents spoilers and grounds answers strictly within the student's current lecture playback time.",
   version: "0.1.0",
   navLinks: [
-    { label: "Dashboard", href: "/dashboard" },
-    { label: "Classroom", href: "/classroom" },
-    { label: "Mock Interview", href: "/interview" },
+    { label: "Firewall Demo", href: "/#firewall-demo" },
+    { label: "Features", href: "/#features" },
+    { label: "How It Works", href: "/#how-it-works" },
+    { label: "Comparison", href: "/#comparison" },
+    { label: "Team", href: "/#team" },
     { label: "Design System", href: "/design" },
   ],
   colors: {
