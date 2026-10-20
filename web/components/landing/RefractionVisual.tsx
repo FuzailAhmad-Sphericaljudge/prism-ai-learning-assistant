@@ -188,6 +188,19 @@ export const RefractionVisual: React.FC = () => {
         ctx.lineWidth = 2;
         ctx.shadowBlur = 8;
         ctx.stroke();
+
+        // Animated traveling photons along each dispersed beam
+        for (let p = 0; p < 2; p++) {
+          const progress = ((time * 0.4 + p * 0.5) % 1);
+          const photonX = exitX + (destX - exitX) * progress;
+          const photonY = beam.exitY + (beam.destY - beam.exitY) * progress;
+          ctx.beginPath();
+          ctx.arc(photonX, photonY, 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = "#FFFFFF";
+          ctx.shadowColor = beam.color;
+          ctx.shadowBlur = 10;
+          ctx.fill();
+        }
       });
 
       // Internal sparkling caustic nodes
