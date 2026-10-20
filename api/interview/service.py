@@ -156,7 +156,7 @@ class InterviewService:
                 transcript=transcript,
                 created_at=session.created_at,
             )
-            session.report_json = report.model_dump()
+            session.report_json = report.model_dump(mode="json")
             session.overall_score = report.overall_score
             session.feedback = f"Oral defense completed with overall score: {report.overall_score}%."
             db.commit()
@@ -232,7 +232,7 @@ class InterviewService:
             transcript=session.transcript_json or [],
             created_at=session.created_at,
         )
-        session.report_json = report.model_dump()
+        session.report_json = report.model_dump(mode="json")
         session.overall_score = report.overall_score
         db.commit()
         return report
