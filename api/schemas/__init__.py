@@ -10,6 +10,17 @@ from api.schemas.source import (
     SourceResponse,
     SourceStatusResponse,
 )
+from api.schemas.session import (
+    SessionCreate,
+    SessionPlaybackPatch,
+    SessionResponse,
+)
+from api.schemas.retrieve import (
+    RetrieveDebugRequest,
+    RetrieveDebugResponse,
+    AdmittedChunkDebug,
+    BlockedChunkDebug,
+)
 
 __all__ = [
     "CourseCreate",
@@ -20,4 +31,11 @@ __all__ = [
     "SourceCreate",
     "SourceResponse",
     "SourceStatusResponse",
+    "SessionCreate",
+    "SessionPlaybackPatch",
+    "SessionResponse",
+    "RetrieveDebugRequest",
+    "RetrieveDebugResponse",
+    "AdmittedChunkDebug",
+    "BlockedChunkDebug",
 ]
