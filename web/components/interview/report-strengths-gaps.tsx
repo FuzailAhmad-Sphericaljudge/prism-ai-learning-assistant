@@ -103,7 +103,12 @@ export function ReportStrengthsGaps({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {revisionLinks.map((rev, idx) => {
-              const targetUrl = rev.action_url || `/learn/${courseId}?t=${rev.playback_sec || 0}`;
+              const targetUrl =
+                rev.timestamp_sec != null
+                  ? `/learn/${courseId}?t=${rev.timestamp_sec}`
+                  : rev.page != null
+                  ? `/learn/${courseId}?page=${rev.page}`
+                  : `/learn/${courseId}`;
 
               return (
                 <Link
@@ -113,15 +118,15 @@ export function ReportStrengthsGaps({
                 >
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-slate-200 group-hover:text-indigo-300 transition-colors">
-                        {rev.concept_tag}
-                      </span>
-                      <span className="font-mono text-[11px] text-indigo-400 px-1.5 py-0.5 rounded bg-indigo-950/50 border border-indigo-800/40">
+                      <span className="font-semibold text-slate-200 group-hover:text-indigo-300 transition-colors line-clamp-1">
                         {rev.label}
+                      </span>
+                      <span className="font-mono text-[11px] text-indigo-400 px-1.5 py-0.5 rounded bg-indigo-950/50 border border-indigo-800/40 shrink-0">
+                        {rev.coordinate}
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-                      {rev.reason}
+                      Remediate topic at lecture coordinate {rev.coordinate} ({rev.type})
                     </p>
                   </div>
 

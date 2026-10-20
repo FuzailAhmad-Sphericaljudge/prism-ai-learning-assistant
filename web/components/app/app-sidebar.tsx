@@ -125,7 +125,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ activeId = "learn" }) =>
           const isActive =
             activeId === item.id ||
             pathname === item.href ||
-            (item.id === "learn" && (pathname?.startsWith("/learn") || pathname === "/app"));
+            (item.id === "learn" && (pathname?.startsWith("/learn") || pathname === "/app")) ||
+            (item.id === "interview" && pathname?.startsWith("/interview")) ||
+            (item.id === "educator" && pathname?.startsWith("/educator"));
 
           const navButton = (
             <Link

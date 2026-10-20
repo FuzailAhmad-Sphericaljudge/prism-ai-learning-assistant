@@ -94,11 +94,9 @@ export function ReportCriterionCard({
           <div className="flex items-center gap-2 flex-wrap">
             {criterion.linked_evidence.map((ev, idx) => {
               const isVideo = ev.source_type === "video";
-              const label = ev.timestamp_range
-                ? `${ev.timestamp_range}`
-                : ev.page
-                ? `Page ${ev.page}`
-                : ev.id;
+              const label =
+                ev.coordinate ||
+                (ev.page ? `Page ${ev.page}` : ev.evidence_id || `E${idx + 1}`);
 
               return (
                 <Link

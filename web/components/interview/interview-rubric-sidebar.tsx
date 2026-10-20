@@ -150,8 +150,8 @@ export function InterviewRubricSidebar({
                       key={eIdx}
                       className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/30 text-cyan-300 border border-cyan-800/40"
                     >
-                      {ev.id}
-                      {ev.timestamp_range && ` (${ev.timestamp_range})`}
+                      {ev.evidence_id || `E${eIdx + 1}`}
+                      {ev.coordinate && ` (${ev.coordinate})`}
                     </span>
                   ))}
                 </div>
