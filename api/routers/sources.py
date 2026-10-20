@@ -1,0 +1,130 @@
+import os
+import shutil
+import logging
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from api.database import get_db
+from api.models.course import Course
+from api.models.source import Source
+from api.schemas.source import SourceResponse, SourceStatusResponse
+from api.ingestion.worker import run_ingestion_job
+
+logger = logging.getLogger("prism.routers.sources")
+
+# Router mounted at root or /courses and /sources
+router = APIRouter(tags=["Sources"])
+
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+def infer_source_type(filename: str, explicit_type: Optional[str]) -> str:
+    if explicit_type and explicit_type.strip() in ("video", "pdf", "ppt", "notes"):
+        return explicit_type.strip()
+    fn = filename.lower()
+    if fn.endswith(".vtt") or fn.endswith(".srt") or fn.endswith(".mp4"):
+        return "video"
+    elif fn.endswith(".pdf"):
+        return "pdf"
+    elif fn.endswith(".pptx") or fn.endswith(".ppt"):
+        return "ppt"
+    elif fn.endswith(".md") or fn.endswith(".txt"):
+        return "notes"
+    return "notes"
+
+
+@router.post(
+    "/courses/{course_id}/sources",
+    response_model=SourceResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Upload and ingest a multi-modal source",
+    description="Uploads a lecture video/transcript, PDF textbook, PPTX slide deck, or Markdown notes and schedules background ingestion.",
+)
+async def upload_source(
+    course_id: str,
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    title: Optional[str] = Form(None),
+    type: Optional[str] = Form(None),
+    version: int = Form(1),
+    db: AsyncSession = Depends(get_db),
+) -> SourceResponse:
+    # 1. Verify course
+    c_stmt = select(Course).where(Course.id == course_id)
+    course = (await db.execute(c_stmt)).scalar_one_or_none()
+    if not course:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Course '{course_id}' not found.")
+
+    source_type = infer_source_type(file.filename or "", type)
+    source_title = (title or file.filename or "Untitled Source").strip()
+
+    # 2. Save uploaded file to persistent storage
+    course_upload_dir = os.path.join(UPLOAD_DIR, course_id)
+    os.makedirs(course_upload_dir, exist_ok=True)
+    destination_path = os.path.join(course_upload_dir, f"v{version}_{file.filename}")
+
+    try:
+        with open(destination_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as exc:
+        logger.error(f"Failed to save uploaded file: {exc}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not persist uploaded file: {exc}",
+        )
+
+    # 3. Check for existing source with same (course_id, title, version)
+    s_stmt = select(Source).where(
+        Source.course_id == course_id,
+        Source.title == source_title,
+        Source.version == version,
+    )
+    existing_source = (await db.execute(s_stmt)).scalar_one_or_none()
+
+    if existing_source:
+        source = existing_source
+        source.file_path = destination_path
+        source.type = source_type
+        source.status = "pending"
+        source.error_message = None
+    else:
+        source = Source(
+            course_id=course_id,
+            title=source_title,
+            type=source_type,
+            file_path=destination_path,
+            version=version,
+            status="pending",
+            meta={"filename": file.filename},
+        )
+        db.add(source)
+
+    await db.commit()
+    await db.refresh(source)
+
+    # 4. Schedule asynchronous background ingestion
+    background_tasks.add_task(
+        run_ingestion_job,
+        source_id=source.id,
+        file_source=destination_path,
+        filename=file.filename,
+    )
+
+    return SourceResponse(
+        id=source.id,
+        course_id=source.course_id,
+        type=source.type,
+        title=source.title,
+        file_path=source.file_path,
+        version=source.version,
+        status=source.status,
+        error_message=source.error_message,
+        duration_sec=source.duration_sec,
+        page_count=source.page_count,
+        meta=source.meta,
+        created_at=source.created_at,
+        updated_at=source.updated_at,
+    )
