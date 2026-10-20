@@ -1,0 +1,91 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 5 0 R /Resources << /Font << /F1 3 0 R >> >> >>
+endobj
+5 0 obj
+<< /Length 637 >>
+stream
+BT
+/F1 12 Tf
+50 740 Td
+16 TL
+(CS 201: Data Structures - Binary Search Trees \(Lecture 14\)) '
+(Instructor: Dr. Elena Rostova) '
+() '
+(1. Motivation: The Dynamic Ordered Set Problem) '
+(In computer systems and database design, we frequently require a data structure) '
+(that maintains a dynamic collection of keys under Search, Insert, and Delete.) '
+(Arrays offer either fast search \(sorted\) or fast insert \(unsorted\), but not both.) '
+(Linked lists allow O\(1\) pointer updates at the head, but lack random access for binary search.) '
+(A Binary Search Tree achieves O\(log N\) search and updates simultaneously when balanced.) '
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 7 0 R /Resources << /Font << /F1 3 0 R >> >> >>
+endobj
+7 0 obj
+<< /Length 560 >>
+stream
+BT
+/F1 12 Tf
+50 740 Td
+16 TL
+(2. The Binary Search Tree Property) '
+(Let x be any node in binary tree T.) '
+(- For any node y in left subtree of x: key\(y\) < key\(x\)) '
+(- For any node y in right subtree of x: key\(y\) >= key\(x\)) '
+() '
+(Crucial Invariant Scope: This condition applies globally across all descendant subtrees,) '
+(not merely between immediate parent and children.) '
+(In-order traversal visits nodes in strictly non-decreasing sorted order.) '
+(Tree sort runs in Theta\(N\) time by performing an in-order walk over a constructed BST.) '
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 9 0 R /Resources << /Font << /F1 3 0 R >> >> >>
+endobj
+9 0 obj
+<< /Length 658 >>
+stream
+BT
+/F1 12 Tf
+50 740 Td
+16 TL
+(3. Operations and Complexity) '
+(- Tree-Search\(x, k\): Discards half the tree at each level. Cost: O\(h\).) '
+(- Tree-Insert\(T, z\): Traces path from root to leaf boundary with trailing pointer. Cost: O\(h\).) '
+(- Tree-Successor\(x\): Smallest key greater than x.key. Concludes at 18:42 timestamp in lecture.) '
+(- Tree-Delete\(T, z\): 3 structural cases \(leaf, single child, two children with successor substitution\).) '
+(- Tree Degeneracy: Inserting sorted keys [1..N] produces height h = N-1, collapsing operations to O\(N\).) '
+(Balanced AVL and Red-Black trees prevent degeneracy via local O\(1\) tree rotations.) '
+ET
+endstream
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000127 00000 n 
+0000000197 00000 n 
+0000000323 00000 n 
+0000001011 00000 n 
+0000001137 00000 n 
+0000001748 00000 n 
+0000001874 00000 n 
+trailer
+<< /Size 10 /Root 1 0 R >>
+startxref
+2583
+%%EOF
