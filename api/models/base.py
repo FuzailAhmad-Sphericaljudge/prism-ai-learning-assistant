@@ -19,6 +19,10 @@ class UUIDMixin:
     )
 
 
+# Alias for compatibility
+UUIDPrimaryKeyMixin = UUIDMixin
+
+
 class TimestampMixin:
     created_at = Column(
         DateTime(timezone=True),

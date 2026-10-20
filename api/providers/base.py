@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Union, AsyncGenerator
 from pydantic import BaseModel, Field
 
 
@@ -18,10 +18,10 @@ class EmbeddingResult(BaseModel):
     provider: str
 
 
-class BaseLLMProvider(ABC):
+class LLMProvider(ABC):
     """
     Abstract interface for LLM & Embedding provider adapters in PRISM.
-    Supports Gemini (production), Mock (demo/offline), and Bedrock (stub).
+    Supports embed(), generate(), and stream().
     """
 
     @property
@@ -31,18 +31,46 @@ class BaseLLMProvider(ABC):
         pass
 
     @abstractmethod
-    async def generate_response(
-        self, prompt: str, system_prompt: Optional[str] = None
-    ) -> ProviderResult:
-        """Generates Socratic response or rubric evaluation text."""
+    async def embed(
+        self, text_or_texts: Union[str, List[str]], dimension: int = 768
+    ) -> List[List[float]]:
+        """Generates dense vector embeddings (batch or single) matching requested dimension."""
         pass
 
     @abstractmethod
-    async def generate_embedding(self, text: str) -> EmbeddingResult:
-        """Generates dense vector embeddings for temporal vector retrieval."""
+    async def generate(
+        self, prompt: str, system_prompt: Optional[str] = None, max_tokens: int = 1024
+    ) -> ProviderResult:
+        """Generates complete text response."""
+        pass
+
+    @abstractmethod
+    async def stream(
+        self, prompt: str, system_prompt: Optional[str] = None
+    ) -> AsyncGenerator[str, None]:
+        """Streams token chunks asynchronously."""
         pass
 
     @abstractmethod
     async def health_check(self) -> dict:
         """Runs a connectivity probe against the provider API."""
         pass
+
+    # Compatibility bridges for Phase 0
+    async def generate_response(
+        self, prompt: str, system_prompt: Optional[str] = None
+    ) -> ProviderResult:
+        return await self.generate(prompt=prompt, system_prompt=system_prompt)
+
+    async def generate_embedding(self, text: str) -> EmbeddingResult:
+        embeddings = await self.embed(text, dimension=768)
+        emb = embeddings[0] if embeddings else []
+        return EmbeddingResult(
+            embedding=emb,
+            dimension=len(emb),
+            model="embedding-adapter",
+            provider=self.name,
+        )
+
+
+BaseLLMProvider = LLMProvider
