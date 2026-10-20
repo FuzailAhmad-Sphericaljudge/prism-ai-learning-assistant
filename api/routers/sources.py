@@ -128,3 +128,38 @@ async def upload_source(
         created_at=source.created_at,
         updated_at=source.updated_at,
     )
+
+
+@router.get(
+    "/sources/{source_id}/status",
+    response_model=SourceStatusResponse,
+    summary="Get source ingestion progress status",
+    description="Polls ingestion state (pending, processing, ready, failed) and chunk count for a source.",
+)
+async def get_source_status(
+    source_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> SourceStatusResponse:
+    s_stmt = select(Source).where(Source.id == source_id)
+    source = (await db.execute(s_stmt)).scalar_one_or_none()
+    if not source:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Source '{source_id}' not found.")
+
+    # Count generated chunks
+    from api.models.chunk import Chunk
+    c_stmt = select(func.count(Chunk.id)).where(Chunk.source_id == source_id)
+    chunk_count = (await db.execute(c_stmt)).scalar() or 0
+
+    return SourceStatusResponse(
+        id=source.id,
+        course_id=source.course_id,
+        type=source.type,
+        title=source.title,
+        status=source.status,
+        chunk_count=chunk_count,
+        duration_sec=source.duration_sec,
+        page_count=source.page_count,
+        error_message=source.error_message,
+        version=source.version,
+    )
+
