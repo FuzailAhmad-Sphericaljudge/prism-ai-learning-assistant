@@ -102,7 +102,13 @@ def check_database() -> bool:
         # Handle postgresql:// schema if needed for SQLAlchemy
         engine_url = db_url
         if engine_url.startswith("postgres://"):
-            engine_url = engine_url.replace("postgres://", "postgresql://", 1)
+            engine_url = engine_url.replace("postgres://", "postgresql+psycopg://", 1)
+        elif engine_url.startswith("postgresql://") and not engine_url.startswith("postgresql+"):
+            try:
+                import psycopg  # noqa: F401
+                engine_url = engine_url.replace("postgresql://", "postgresql+psycopg://", 1)
+            except ImportError:
+                pass
 
         engine = sqlalchemy.create_engine(engine_url, connect_args={"connect_timeout": 8})
 
