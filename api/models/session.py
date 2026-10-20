@@ -13,6 +13,7 @@ class Session(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     course_id = Column(String(36), ForeignKey("courses.id", ondelete="CASCADE"), nullable=False, index=True)
     current_playback_sec = Column(Float, nullable=False, default=0.0, index=True)
+    mode = Column(String(50), nullable=False, default="learn_so_far")
     title = Column(String(255), nullable=True, default="Interactive Lecture Session")
 
     # Relationships
@@ -38,6 +39,7 @@ class Message(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     playback_sec = Column(Float, nullable=False, default=0.0)
     citations = Column(JSON, nullable=True, default=list)
     is_firewalled = Column(Boolean, nullable=False, default=True)
+    explored_ahead = Column(Boolean, nullable=False, default=False)
 
     # Relationships
     session = relationship("Session", back_populates="messages")
