@@ -87,7 +87,7 @@ export const LandingNavbar: React.FC = () => {
               <a
                 key={link.href}
                 href={link.href}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium text-foreground-muted hover:text-white hover:bg-white/[0.04] transition-all duration-200"
+                className="px-3 py-1.5 rounded-lg text-xs font-medium text-foreground-muted hover:text-white hover:bg-white/[0.04] transition-all duration-200 outline-none focus-visible:ring-1 focus-visible:ring-prism-cyan"
               >
                 {link.label}
               </a>
