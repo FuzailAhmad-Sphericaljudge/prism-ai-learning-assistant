@@ -108,13 +108,25 @@ export const Navbar: React.FC<NavbarProps> = ({ apiStatus: propApiStatus }) => {
             className="text-foreground-muted hover:text-white"
           >
             <a
-              href="https://github.com/FuzailAhmad-Sphericaljudge/Prism"
+              href="https://github.com/FuzailAhmad-Sphericaljudge/prism-ai-learning-assistant"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub Repository"
             >
               <Github className="h-4 w-4" />
             </a>
+          </Button>
+
+          {/* Try the demo Gradient Button */}
+          <Button
+            variant="primary"
+            size="sm"
+            asChild
+            className="shadow-prism-glow text-xs font-semibold px-3.5 h-8 hidden lg:flex"
+          >
+            <Link href="/#firewall-demo">
+              <span>Try the demo</span>
+            </Link>
           </Button>
         </div>
 
