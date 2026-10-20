@@ -47,7 +47,7 @@ def check_gemini() -> bool:
     masked = mask_secret(api_key)
 
     # 1. Test generateContent
-    generate_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    generate_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={api_key}"
     payload = {
         "contents": [
             {
@@ -59,16 +59,16 @@ def check_gemini() -> bool:
     }
 
     try:
-        with httpx.Client(timeout=10.0) as client:
+        with httpx.Client(timeout=20.0) as client:
             resp = client.post(generate_url, json=payload)
             if resp.status_code != 200:
                 print(f"[FAIL] GEMINI_API_KEY ({masked}): Generate probe failed (HTTP {resp.status_code})")
                 return False
 
-            # 2. Test text-embedding-004
-            embed_url = f"https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={api_key}"
+            # 2. Test gemini-embedding-001
+            embed_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={api_key}"
             embed_payload = {
-                "model": "models/text-embedding-004",
+                "model": "models/gemini-embedding-001",
                 "content": {"parts": [{"text": "Temporal Evidence Firewall"}]},
             }
             embed_resp = client.post(embed_url, json=embed_payload)
@@ -80,7 +80,7 @@ def check_gemini() -> bool:
             embedding_values = data.get("embedding", {}).get("values", [])
             dim = len(embedding_values)
 
-            print(f"[PASS] GEMINI_API_KEY ({masked}): Text generation and text-embedding-004 verified (dim={dim})")
+            print(f"[PASS] GEMINI_API_KEY ({masked}): Text generation (gemini-3.5-flash-lite) and embeddings (gemini-embedding-001) verified (dim={dim})")
             return True
     except Exception as exc:
         print(f"[FAIL] GEMINI_API_KEY ({masked}): Network error: {exc}")
