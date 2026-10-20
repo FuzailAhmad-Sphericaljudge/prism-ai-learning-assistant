@@ -73,10 +73,8 @@ class TranscriptChunker:
                 )
             )
             chunk_idx += 1
-            idx += step
-
-            # Prevent endless loop if step is 0 or window reaches end
-            if idx >= len(atomic_units):
+            if idx + self.target_sentences >= len(atomic_units):
                 break
+            idx += step
 
         return chunks
