@@ -83,6 +83,77 @@ export interface EvidenceBadge {
   similarity?: number;
 }
 
+export interface DiagnosticCheck {
+  question: string;
+  options: string[];
+  correct_index: number;
+  explanation: string;
+}
+
+export interface CitationItem {
+  evidence_id: string;
+  chunk_id: string;
+  source_type: "video" | "pdf" | "ppt" | "notes" | string;
+  coordinate: string;
+  quote: string;
+  start_sec?: number | null;
+  end_sec?: number | null;
+  slide?: number | null;
+  page?: number | null;
+}
+
+export interface ChatRequest {
+  query: string;
+  course_id: string;
+  playback_sec: number;
+  mode?: FirewallMode;
+  session_id?: string | null;
+  user_id?: string;
+}
+
+export interface ChatResponse {
+  answer: string;
+  citations: CitationItem[];
+  check?: DiagnosticCheck | null;
+  is_not_covered: boolean;
+  not_covered_topic?: string | null;
+  available_at_sec?: number | null;
+  session_id?: string | null;
+  message_id?: string | null;
+  validation_passed: boolean;
+}
+
+export interface AdmittedChunkDebug {
+  chunk_id: string;
+  source_type: string;
+  coordinate: string;
+  status: "fully_admitted" | "interpolated_straddling" | "unlocked_explore_ahead";
+  start_sec?: number | null;
+  end_sec?: number | null;
+  page?: number | null;
+  slide?: number | null;
+  excerpt: string;
+}
+
+export interface BlockedChunkDebug {
+  chunk_id: string;
+  source_type: string;
+  coordinate: string;
+  status: "excluded_future" | "excluded_resource_policy";
+  reason: string;
+}
+
+export interface RetrieveDebugResponse {
+  course_id: string;
+  playback_sec: number;
+  mode: FirewallMode;
+  admitted_count: number;
+  blocked_count: number;
+  admitted: AdmittedChunkDebug[];
+  blocked: BlockedChunkDebug[];
+  scoped_prompt_preview?: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant" | "system";
@@ -90,4 +161,10 @@ export interface ChatMessage {
   timestamp_sec?: number | null;
   created_at: string;
   evidence_badges?: EvidenceBadge[];
+  citations?: CitationItem[];
+  check?: DiagnosticCheck | null;
+  is_not_covered?: boolean;
+  not_covered_topic?: string | null;
+  available_at_sec?: number | null;
+  isStreaming?: boolean;
 }
