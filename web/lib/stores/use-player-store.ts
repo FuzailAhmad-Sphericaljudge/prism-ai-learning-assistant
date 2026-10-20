@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { FirewallMode } from "@/lib/api-types";
+import { FirewallMode, CitationItem, RetrieveDebugResponse } from "@/lib/api-types";
 
 export interface PlayerState {
   // Playback state
@@ -21,6 +21,12 @@ export interface PlayerState {
   activeSlide: number;
   activePdfPage: number;
 
+  // Evidence Inspector drawer state
+  activeEvidenceCitation: CitationItem | null;
+  isEvidenceDrawerOpen: boolean;
+  activeQueryForEvidence: string | null;
+  activeRetrieveDebug: RetrieveDebugResponse | null;
+
   // Actions
   setCurrentTime: (time: number) => void;
   setDuration: (duration: number) => void;
@@ -39,6 +45,10 @@ export interface PlayerState {
   setResourcesSubTab: (subTab: "slides" | "pdf" | "notes") => void;
   jumpToSlide: (slide: number) => void;
   jumpToPage: (page: number) => void;
+
+  openEvidenceInspector: (citation: CitationItem, query?: string) => void;
+  closeEvidenceInspector: () => void;
+  setActiveRetrieveDebug: (debug: RetrieveDebugResponse | null) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
@@ -57,6 +67,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   resourcesSubTab: "slides",
   activeSlide: 1,
   activePdfPage: 1,
+
+  activeEvidenceCitation: null,
+  isEvidenceDrawerOpen: false,
+  activeQueryForEvidence: null,
+  activeRetrieveDebug: null,
 
   setCurrentTime: (time: number) => {
     const validTime = Math.max(0, time);
@@ -122,5 +137,24 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       activeRightTab: "resources",
       resourcesSubTab: "pdf",
     });
+  },
+
+  openEvidenceInspector: (citation: CitationItem, query?: string) => {
+    set({
+      activeEvidenceCitation: citation,
+      isEvidenceDrawerOpen: true,
+      activeQueryForEvidence: query || null,
+      activeRightTab: "evidence",
+    });
+  },
+
+  closeEvidenceInspector: () => {
+    set({
+      isEvidenceDrawerOpen: false,
+    });
+  },
+
+  setActiveRetrieveDebug: (activeRetrieveDebug: RetrieveDebugResponse | null) => {
+    set({ activeRetrieveDebug });
   },
 }));
