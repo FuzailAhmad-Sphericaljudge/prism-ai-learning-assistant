@@ -168,3 +168,127 @@ export interface ChatMessage {
   available_at_sec?: number | null;
   isStreaming?: boolean;
 }
+
+// ==========================================
+// Phase 6: Practice & Mastery Tracking Models
+// ==========================================
+
+export interface RevisionAction {
+  type: "video" | "slide" | "pdf" | string;
+  coordinate: string;
+  timestamp_sec?: number | null;
+  slide?: number | null;
+  page?: number | null;
+  label: string;
+}
+
+export interface PracticeQuestion {
+  id: string;
+  course_id: string;
+  concept_tag: string;
+  question_type: "mcq" | "short_answer";
+  question_text: string;
+  options?: string[] | null;
+  correct_answer: string;
+  correct_index?: number | null;
+  explanation: string;
+  evidence_links: CitationItem[];
+}
+
+export interface PracticeGenerateRequest {
+  course_id: string;
+  playback_sec?: number | null;
+  mode?: FirewallMode;
+  concept_tag?: string | null;
+  question_type?: "mcq" | "short_answer" | "all";
+  count?: number;
+}
+
+export interface PracticeGenerateResponse {
+  course_id: string;
+  playback_sec?: number | null;
+  mode: FirewallMode;
+  questions: PracticeQuestion[];
+  available_concepts: string[];
+}
+
+export interface AttemptSubmitRequest {
+  question_id: string;
+  course_id: string;
+  user_id?: string;
+  session_id?: string | null;
+  concept_tag: string;
+  question_text: string;
+  question_type: "mcq" | "short_answer";
+  user_answer: string;
+  playback_sec?: number | null;
+}
+
+export interface AttemptSubmitResponse {
+  attempt_id: string;
+  is_correct: boolean;
+  score: number;
+  misconception_tag?: string | null;
+  feedback: string;
+  explanation: string;
+  revision_action?: RevisionAction | null;
+  linked_evidence: CitationItem[];
+  concept_tag: string;
+  updated_mastery_status: "not_assessed" | "gap_found" | "improving" | "demonstrated";
+  updated_mastery_score: number;
+}
+
+export interface ConceptMastery {
+  concept_tag: string;
+  status: "not_assessed" | "gap_found" | "improving" | "demonstrated";
+  mastery_score: number;
+  attempts_count: number;
+  correct_count: number;
+  misconceptions: string[];
+  last_assessed_at?: string | null;
+  evidence_landmarks: string[];
+}
+
+export interface NextBestAction {
+  concept_tag: string;
+  reason: string;
+  recommended_type: "revise" | "practice" | "explore";
+  action_url: string;
+  coordinate?: string | null;
+  label: string;
+}
+
+export interface MasteryDashboardResponse {
+  course_id: string;
+  user_id: string;
+  total_concepts: number;
+  assessed_concepts: number;
+  demonstrated_count: number;
+  improving_count: number;
+  gap_count: number;
+  unassessed_count: number;
+  overall_mastery_percentage: number;
+  concepts: ConceptMastery[];
+  next_best_action?: NextBestAction | null;
+}
+
+export interface TimelineAttemptItem {
+  id: string;
+  concept_tag: string;
+  question_text: string;
+  user_answer: string;
+  is_correct: boolean;
+  misconception_tag?: string | null;
+  feedback: string;
+  explanation: string;
+  created_at: string;
+  revision_action?: RevisionAction | null;
+  linked_evidence: CitationItem[];
+}
+
+export interface MasteryTimelineResponse {
+  course_id: string;
+  user_id: string;
+  total_attempts: number;
+  timeline: TimelineAttemptItem[];
+}
