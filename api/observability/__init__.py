@@ -13,6 +13,7 @@ from api.observability.logging import (
     get_logger,
 )
 from api.observability.middleware import TraceContextMiddleware
+from api.observability.metrics import MetricsCollector, metrics_collector
 
 __all__ = [
     "get_request_id",
@@ -23,4 +24,6 @@ __all__ = [
     "configure_structured_logging",
     "get_logger",
     "TraceContextMiddleware",
+    "MetricsCollector",
+    "metrics_collector",
 ]
