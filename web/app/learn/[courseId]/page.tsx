@@ -135,6 +135,15 @@ export default function LearnCoursePage() {
     setMobileView("chat");
   };
 
+  const handleMobileViewChange = (view: LearnMobileView) => {
+    setMobileView(view);
+    if (view === "chat") {
+      setRightTab("ask");
+    } else if (view === "resources") {
+      setRightTab("resources");
+    }
+  };
+
   const courseTitle = course?.title || "CS 201: Binary Search Trees & Balanced Structures";
   const courseCode = course?.code || "CS 201";
 
@@ -230,7 +239,7 @@ export default function LearnCoursePage() {
         {/* Mobile Tab Navigation Bar */}
         <LearnMobileTabs
           activeView={mobileView}
-          onViewChange={setMobileView}
+          onViewChange={handleMobileViewChange}
         />
       </div>
     </AppShell>
