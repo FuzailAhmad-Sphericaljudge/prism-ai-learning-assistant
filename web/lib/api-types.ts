@@ -449,3 +449,55 @@ export interface EducatorInsightsResponse {
   concept_distributions: ConceptMasteryDistribution[];
 }
 
+// ==========================================
+// PHASE 8: OBSERVABILITY & ADMIN CONTRACTS
+// ==========================================
+
+export interface LatencyDistributionBucket {
+  bucket: string;
+  count: number;
+}
+
+export interface TimelinePoint {
+  timestamp: string;
+  latency_ms: number;
+  validation_passed: boolean;
+  query: string;
+  playback_sec: number;
+  mode: string;
+}
+
+export interface AdminMetricsResponse {
+  total_queries: number;
+  p50_latency_ms: number;
+  p95_latency_ms: number;
+  p99_latency_ms: number;
+  mean_latency_ms: number;
+  validation_pass_rate: number;
+  firewall_leak_rate: number;
+  temporal_enforcement_rate: number;
+  learn_so_far_count: number;
+  explore_ahead_count: number;
+  latency_distribution: LatencyDistributionBucket[];
+  recent_timeline: TimelinePoint[];
+}
+
+export interface TraceItem {
+  id: string;
+  trace_id: string;
+  request_id?: string;
+  session_id?: string;
+  query: string;
+  latency_ms: number;
+  playback_sec: number;
+  mode: string;
+  citation_count: number;
+  admitted_chunks: number;
+  blocked_chunks: number;
+  validation_passed: boolean;
+  leakage_detected: boolean;
+  diagnostic_generated: boolean;
+  timestamp: string;
+}
+
+
