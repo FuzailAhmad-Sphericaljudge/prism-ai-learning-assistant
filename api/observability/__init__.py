@@ -12,6 +12,7 @@ from api.observability.logging import (
     configure_structured_logging,
     get_logger,
 )
+from api.observability.middleware import TraceContextMiddleware
 
 __all__ = [
     "get_request_id",
@@ -21,4 +22,5 @@ __all__ = [
     "JSONLogFormatter",
     "configure_structured_logging",
     "get_logger",
+    "TraceContextMiddleware",
 ]
