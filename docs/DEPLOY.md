@@ -1,5 +1,9 @@
 # PRISM Deployment Guide
 
+> [!IMPORTANT]
+> **This document has been consolidated and superseded by the comprehensive production guide:**  
+> 👉 [**docs/DEPLOYMENT.md**](file:///c:/Users/Fuzail%20Jarvis/OneDrive/Desktop/Prism/docs/DEPLOYMENT.md) — includes complete architecture mermaid diagram, step-by-step guides, full environment variable table, docker-compose instructions, smoke test verification, and troubleshooting matrix.
+
 > **Zero-Cost Free-Tier Production Setup**  
 > Frontend: **Vercel** (`/web`)  
 > Backend: **Render** / **Railway** (`/api`)  
