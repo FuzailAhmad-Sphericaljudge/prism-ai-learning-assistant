@@ -6,6 +6,7 @@ from api.models.user import User
 from api.models.session import Session, Message
 from api.models.mastery import Attempt, MasteryRecord
 from api.models.interview import InterviewSession, InterviewExchange
+from api.models.observability import EvaluationRecord
 
 __all__ = [
     "Base",
@@ -24,4 +25,5 @@ __all__ = [
     "MasteryRecord",
     "InterviewSession",
     "InterviewExchange",
+    "EvaluationRecord",
 ]
