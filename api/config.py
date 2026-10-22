@@ -32,8 +32,8 @@ class Settings(BaseSettings):
     LLM_PROVIDER: str = "mock"  # 'mock' | 'gemini' | 'bedrock'
     GEMINI_API_KEY: str = ""
 
-    # Database & Vector Store settings
-    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/prism"
+    # Database & Vector Store settings (Production Cloud Supabase with fallback)
+    DATABASE_URL: str = "postgresql://postgres.qhqoyhqkqfoqcgcaposk:QutX7FCd3%25-%40iUV@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres"
     SUPABASE_URL: str = ""
     SUPABASE_KEY: str = ""
 
