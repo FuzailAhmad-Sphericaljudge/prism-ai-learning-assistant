@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { getApiBaseUrl } from "@/lib/api-client";
 
 export type ApiHealthStatus = "online" | "offline" | "checking";
 
@@ -20,7 +21,7 @@ export function useApiHealth(intervalMs: number = 30000) {
   const [lastChecked, setLastChecked] = React.useState<Date | null>(null);
 
   const checkHealth = React.useCallback(async () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const apiUrl = getApiBaseUrl();
 
     try {
       const controller = new AbortController();

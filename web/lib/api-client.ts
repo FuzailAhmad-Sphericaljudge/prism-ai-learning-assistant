@@ -9,13 +9,23 @@ export interface RequestOptions extends RequestInit {
   timeoutMs?: number;
 }
 
+export function getApiBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
+  }
+  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+    return "http://localhost:8000";
+  }
+  return "https://prism-api-z7c9.onrender.com";
+}
+
 export async function apiClient<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
   const { timeoutMs = 15000, headers = {}, ...rest } = options;
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-  const url = `${baseUrl.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
+  const baseUrl = getApiBaseUrl();
+  const url = `${baseUrl}/${endpoint.replace(/^\//, "")}`;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
