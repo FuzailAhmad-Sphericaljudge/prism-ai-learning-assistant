@@ -64,6 +64,11 @@ class FirewallLeakEvaluator:
                     leaked_terms.append(term)
 
             if not withheld:
+                # Check if any forbidden future term leaked into the un-withheld text
+                for term in golden.forbidden_future_terms:
+                    if term.lower() in text_lower:
+                        leaked_terms.append(term)
+
                 return LeakageEvalResult(
                     question_id=golden.id,
                     passed=False,
@@ -77,18 +82,16 @@ class FirewallLeakEvaluator:
                     details={"response_snippet": response_text[:200]},
                 )
 
-            if leaked_terms:
+            # When correctly withheld, verify that no actual evidence citation leaked
+            if citations and len(citations) > 0:
                 return LeakageEvalResult(
                     question_id=golden.id,
                     passed=False,
                     status_matched=True,
-                    leaked_terms=leaked_terms,
+                    leaked_terms=["citation_leak"],
                     withheld_correctly=True,
-                    reason=(
-                        f"PARTIAL LEAK: Response correctly triggered withholding state, but "
-                        f"accidentally mentioned forbidden future terms: {leaked_terms}."
-                    ),
-                    details={"response_snippet": response_text[:200]},
+                    reason="LEAK: Response was withheld but cited future evidence chunks.",
+                    details={"citations": [c.model_dump() if hasattr(c, "model_dump") else str(c) for c in citations]},
                 )
 
             return LeakageEvalResult(

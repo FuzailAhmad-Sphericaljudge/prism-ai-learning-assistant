@@ -25,9 +25,8 @@ from api.database import SessionLocal
 from api.evals.golden_dataset import GOLDEN_QUESTIONS, GoldenQuestion
 from api.evals.leakage_eval import FirewallLeakEvaluator, LeakageEvalResult
 from api.evals.citation_eval import CitationValidityEvaluator, CitationEvalResult
-from api.chat.tutor import GroundedTutorPipeline
-from api.firewall.retriever import HybridRetriever
-from api.providers.factory import ProviderFactory
+from api.tutor.workflow import TutorWorkflow
+from api.schemas.chat import ChatRequest
 
 COURSE_ID = "00000000-0000-0000-0000-000000000002"
 USER_ID = "00000000-0000-0000-0000-000000000001"
@@ -59,22 +58,24 @@ def run_eval_suite(output_markdown_path: Path = ROOT / "docs" / "EVAL.md") -> Di
     print("=" * 80 + "\n")
 
     db = SessionLocal()
-    provider = ProviderFactory.get_provider("mock")
-    tutor_pipeline = GroundedTutorPipeline(provider=provider)
-    retriever = HybridRetriever(provider=provider)
+    workflow = TutorWorkflow()
 
     results: List[EvalReportItem] = []
 
     for q in GOLDEN_QUESTIONS:
         t0 = time.perf_counter()
 
-        # Execute through pipeline
-        chat_resp = tutor_pipeline.answer(
+        chat_req = ChatRequest(
             query=q.question,
             playback_sec=q.playback_sec,
             mode=q.mode,
             course_id=COURSE_ID,
             user_id=USER_ID,
+        )
+
+        # Execute through tutor workflow
+        chat_resp = workflow.execute(
+            req=chat_req,
             db=db,
         )
 

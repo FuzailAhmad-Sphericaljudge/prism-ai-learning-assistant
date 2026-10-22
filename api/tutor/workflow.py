@@ -57,12 +57,16 @@ class TutorWorkflow:
 
         q_lower = query.lower()
 
-        # Deletion is taught after 18:42 (1122s)
-        if playback_sec < 1122.0 and any(w in q_lower for w in ["delete", "deletion", "two children", "splice"]):
-            return True, "Node deletion algorithms", 1122.0
+        # In-order successor is taught after 19:15 (1155s)
+        if playback_sec < 1155.0 and any(w in q_lower for w in ["successor", "in-order successor"]):
+            return True, "In-order successor algorithms", 1155.0
+
+        # Deletion is taught after 22:00 (1320s)
+        if playback_sec < 1320.0 and any(w in q_lower for w in ["delete", "deletion", "two children", "splice", "case 1", "case 2", "case 3"]):
+            return True, "Node deletion algorithms", 1320.0
 
         # Self-balancing trees (AVL / Red-Black) taught after 25:30 (1530s)
-        if playback_sec < 1530.0 and any(w in q_lower for w in ["avl", "red-black", "rotation", "self-balancing"]):
+        if playback_sec < 1530.0 and any(w in q_lower for w in ["avl", "red-black", "rotation", "self-balancing", "rebalance"]):
             return True, "Self-balancing tree rotations (AVL & Red-Black)", 1530.0
 
         return False, None, None

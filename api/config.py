@@ -41,6 +41,19 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    @field_validator("DEBUG", mode="before")
+    @classmethod
+    def parse_debug(cls, v: Union[str, bool, int]) -> bool:
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            v_lower = v.strip().lower()
+            if v_lower in ("true", "1", "t", "yes", "y", "dev", "development", "debug"):
+                return True
+            if v_lower in ("false", "0", "f", "no", "n", "prod", "production", "release"):
+                return False
+        return bool(v)
+
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
