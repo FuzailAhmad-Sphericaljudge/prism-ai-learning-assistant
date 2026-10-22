@@ -1,6 +1,6 @@
 {
   "name": "prism-monorepo",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "PRISM: Temporal Evidence Firewall & Timestamp-Aware Learning Assistant",
   "workspaces": [
@@ -18,7 +18,9 @@
     "verify:phase4": "python scripts/verify_phase4.py",
     "verify:phase5": "python scripts/verify_phase5.py",
     "verify:phase6": "python scripts/verify_phase6.py",
-    "verify:phase7": "python scripts/verify_phase7.py"
+    "verify:phase7": "python scripts/verify_phase7.py",
+    "verify:phase8": "python scripts/verify_phase8.py",
+    "verify:all": "python scripts/verify_phase8.py"
   },
   "keywords": [
     "education",
