@@ -35,12 +35,13 @@ class TutorWorkflow:
         resolver: Optional[DeicticContextResolver] = None,
         context_builder: Optional[ScopedContextBuilder] = None,
         validator: Optional[OutputValidator] = None,
+        provider: Optional[Any] = None,
     ):
-        self.retriever = retriever or HybridRetriever()
+        self.provider = provider or get_provider()
+        self.retriever = retriever or HybridRetriever(provider=self.provider)
         self.resolver = resolver or DeicticContextResolver()
         self.context_builder = context_builder or ScopedContextBuilder()
         self.validator = validator or OutputValidator()
-        self.provider = get_provider()
 
     def detect_downstream_leakage_attempt(
         self,
