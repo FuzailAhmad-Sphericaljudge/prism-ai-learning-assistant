@@ -68,4 +68,6 @@ desktop.ini
 # Uploads & Temporary Media
 uploads/
 api/uploads/
+*.tsbuildinfo
+
 
