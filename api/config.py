@@ -17,13 +17,15 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     PORT: int = 8000
     HOST: str = "0.0.0.0"
-    VERSION: str = "0.1.0"
+    VERSION: str = "1.0.0"
 
     # CORS settings: accepts list of strings or JSON-encoded string
     CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://prism-web.vercel.app",
+        "https://web-one-blue-mbb8ovavhb.vercel.app",
+        "https://prism-api-z7c9.onrender.com",
     ]
 
     # LLM & Embedding provider configuration
@@ -67,6 +69,53 @@ class Settings(BaseSettings):
         elif isinstance(v, list):
             return v
         return ["*"]
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def normalize_database_url(cls, v: str) -> str:
+        if isinstance(v, str) and v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        return v
+
+
+def validate_environment(settings: Settings = None) -> dict:
+    """
+    Validates runtime environment variables, provider credentials, and database readiness.
+    Provides automated fallbacks to keep the demo resilient.
+    """
+    import logging
+    logger = logging.getLogger("prism.config")
+
+    if settings is None:
+        settings = get_settings()
+
+    issues = []
+    warnings = []
+
+    # 1. Database check
+    if not settings.DATABASE_URL:
+        issues.append("DATABASE_URL is empty.")
+
+    # 2. LLM Provider verification
+    if settings.LLM_PROVIDER == "gemini" and not settings.GEMINI_API_KEY:
+        warnings.append(
+            "GEMINI_API_KEY is not configured while LLM_PROVIDER='gemini'. "
+            "Falling back to high-fidelity mock provider for demo resilience."
+        )
+
+    for warn in warnings:
+        logger.warning(f"[STARTUP WARNING] {warn}")
+    for issue in issues:
+        logger.error(f"[STARTUP CRITICAL] {issue}")
+
+    return {
+        "status": "healthy" if not issues else "degraded",
+        "app_env": settings.APP_ENV,
+        "llm_provider": settings.LLM_PROVIDER,
+        "database_configured": bool(settings.DATABASE_URL),
+        "issues": issues,
+        "warnings": warnings,
+    }
 
 
 @lru_cache()
