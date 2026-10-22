@@ -14,7 +14,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.config import Settings, get_settings
+from api.config import Settings, get_settings, validate_environment
 from api.middleware.request_id import RequestIdMiddleware
 from api.middleware.logging import StructuredLoggingMiddleware
 from api.observability.middleware import TraceContextMiddleware
@@ -29,11 +29,13 @@ logger = logging.getLogger("prism.main")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
+    env_validation = validate_environment(settings)
     logger.info("==================================================")
     logger.info(f" Starting {settings.APP_NAME} v{settings.VERSION}")
     logger.info(" Team The Falcons — Hackathon 2026")
     logger.info(f" Mode: {settings.APP_ENV} | LLM: {settings.LLM_PROVIDER}")
     logger.info(" Temporal Evidence Firewall: ACTIVE")
+    logger.info(f" Environment Status: {env_validation['status'].upper()}")
     logger.info("==================================================")
     yield
     logger.info(f" Shutting down {settings.APP_NAME} gracefully.")
@@ -52,10 +54,11 @@ def create_app(settings: Settings = None) -> FastAPI:
         lifespan=lifespan,
     )
 
-    # 1. CORS Configuration
+    # 1. CORS Configuration with Vercel Wildcard Support
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.CORS_ORIGINS,
+        allow_origin_regex=r"https://.*\.vercel\.app",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
