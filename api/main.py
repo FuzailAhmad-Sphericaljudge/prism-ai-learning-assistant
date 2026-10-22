@@ -17,13 +17,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.config import Settings, get_settings
 from api.middleware.request_id import RequestIdMiddleware
 from api.middleware.logging import StructuredLoggingMiddleware
-from api.routers import health, courses, sources, sessions, retrieve, chat, practice, mastery, interview, educator
+from api.observability.middleware import TraceContextMiddleware
+from api.observability.logging import configure_structured_logging
+from api.routers import health, courses, sources, sessions, retrieve, chat, practice, mastery, interview, educator, admin
 
-# Setup logging format
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
+# Setup structured logging
+configure_structured_logging()
 logger = logging.getLogger("prism.main")
 
 
@@ -62,7 +61,8 @@ def create_app(settings: Settings = None) -> FastAPI:
         allow_headers=["*"],
     )
 
-    # 2. Request tracing and structured logging
+    # 2. Request tracing and structured observability
+    app.add_middleware(TraceContextMiddleware)
     app.add_middleware(StructuredLoggingMiddleware)
     app.add_middleware(RequestIdMiddleware)
 
@@ -77,6 +77,7 @@ def create_app(settings: Settings = None) -> FastAPI:
     app.include_router(mastery.router)
     app.include_router(interview.router)
     app.include_router(educator.router)
+    app.include_router(admin.router)
 
     # 4. Root Welcome Route
     @app.get("/", tags=["System"])

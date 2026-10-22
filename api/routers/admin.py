@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 from api.database import get_db
 from api.observability.metrics import metrics_collector
-from api.evals.runner import run_evaluations
+from api.evals.runner import run_eval_suite
 from api.models.observability import EvaluationRecord
 
 router = APIRouter(prefix="/admin", tags=["admin-observability"])
@@ -136,7 +136,7 @@ def trigger_eval_run():
     Trigger full Phase 8 benchmark evaluation suite and record metrics.
     """
     try:
-        report = run_evaluations()
+        report = run_eval_suite()
         return {
             "status": "success",
             "summary": report.summary,

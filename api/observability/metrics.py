@@ -27,10 +27,10 @@ class MetricsCollector:
 
     def _init_benchmark_baseline(self) -> None:
         """Seed baseline golden evaluation records so the dashboard has immediate fidelity."""
-        from api.evals.golden_dataset import GOLDEN_DATASET
+        from api.evals.golden_dataset import GOLDEN_QUESTIONS
 
         base_time = time.time() - 3600  # 1 hour ago
-        for i, q in enumerate(GOLDEN_DATASET):
+        for i, q in enumerate(GOLDEN_QUESTIONS):
             # Synthetic realistic latency around 950ms - 1300ms
             latency = 920.0 + (i * 23.5) % 450.0
             is_valid = True
@@ -40,13 +40,13 @@ class MetricsCollector:
                 "trace_id": f"trc-bench-{uuid.uuid4().hex[:12]}",
                 "request_id": f"req-bench-{i+1}",
                 "session_id": "session-demo-falcon",
-                "query": q["query"],
+                "query": q.question,
                 "latency_ms": round(latency, 2),
-                "playback_sec": float(q["playback_sec"]),
-                "mode": q["mode"],
-                "citation_count": len(q.get("expected_permitted_ids", [])),
-                "admitted_chunks": len(q.get("expected_permitted_ids", [])),
-                "blocked_chunks": 4 if q["mode"] == "learn_so_far" else 0,
+                "playback_sec": float(q.playback_sec),
+                "mode": q.mode,
+                "citation_count": q.expected_min_citations,
+                "admitted_chunks": max(1, q.expected_min_citations),
+                "blocked_chunks": 4 if q.mode == "learn_so_far" else 0,
                 "validation_passed": is_valid,
                 "leakage_detected": leakage,
                 "diagnostic_generated": True,

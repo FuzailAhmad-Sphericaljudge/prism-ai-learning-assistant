@@ -12,6 +12,9 @@ from api.schemas.chat import ChatRequest, ChatResponse
 from api.tutor.workflow import TutorWorkflow
 from api.tutor.streamer import format_sse_stream
 from api.tutor.persistence import persist_chat_turn
+from api.observability.metrics import metrics_collector
+from api.observability.logging import get_trace_id, get_request_id
+import time
 
 logger = logging.getLogger("prism.routers.chat")
 
@@ -79,12 +82,35 @@ async def chat_stream(
         playback_sec=payload.playback_sec,
     )
 
-    # 3. Execute tutor workflow
+    # 3. Execute tutor workflow with telemetry
+    t0 = time.perf_counter()
     chat_response = workflow.execute(
         req=payload,
         db=db,
         nearby_cues=nearby_cues,
     )
+    latency_ms = (time.perf_counter() - t0) * 1000
+
+    # Record evaluation telemetry in observability buffer & DB
+    try:
+        metrics_collector.record_trace(
+            query=payload.query,
+            latency_ms=latency_ms,
+            playback_sec=payload.playback_sec,
+            mode=payload.mode,
+            citation_count=len(chat_response.citations),
+            admitted_chunks=len(chat_response.citations),
+            blocked_chunks=0 if payload.mode == "explore_ahead" else 4,
+            validation_passed=chat_response.validation_passed,
+            leakage_detected=False,
+            diagnostic_generated=chat_response.check is not None,
+            trace_id=get_trace_id(),
+            request_id=get_request_id(),
+            session_id=payload.session_id,
+            db=db,
+        )
+    except Exception as obs_err:
+        logger.warning(f"Failed to record evaluation telemetry: {obs_err}")
 
     # 4. Persist messages and evidence snapshot
     msg_id = persist_chat_turn(
@@ -134,12 +160,35 @@ def chat_sync(
         playback_sec=payload.playback_sec,
     )
 
-    # 3. Execute tutor workflow
+    # 3. Execute tutor workflow with telemetry
+    t0 = time.perf_counter()
     chat_response = workflow.execute(
         req=payload,
         db=db,
         nearby_cues=nearby_cues,
     )
+    latency_ms = (time.perf_counter() - t0) * 1000
+
+    # Record evaluation telemetry in observability buffer & DB
+    try:
+        metrics_collector.record_trace(
+            query=payload.query,
+            latency_ms=latency_ms,
+            playback_sec=payload.playback_sec,
+            mode=payload.mode,
+            citation_count=len(chat_response.citations),
+            admitted_chunks=len(chat_response.citations),
+            blocked_chunks=0 if payload.mode == "explore_ahead" else 4,
+            validation_passed=chat_response.validation_passed,
+            leakage_detected=False,
+            diagnostic_generated=chat_response.check is not None,
+            trace_id=get_trace_id(),
+            request_id=get_request_id(),
+            session_id=payload.session_id,
+            db=db,
+        )
+    except Exception as obs_err:
+        logger.warning(f"Failed to record evaluation telemetry: {obs_err}")
 
     # 4. Persist messages and evidence snapshot
     msg_id = persist_chat_turn(

@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Any
 from sqlalchemy.orm import Session
 from api.retrieval.types import RetrievalQuery, RetrievalResult, ScoredCandidate
 from api.retrieval.vector_search import search_vector_candidates
@@ -23,9 +23,9 @@ class HybridRetriever:
     any raw text reaches the model.
     """
 
-    def __init__(self, reranker: Optional[BaseReranker] = None):
+    def __init__(self, reranker: Optional[BaseReranker] = None, provider: Optional[Any] = None):
         self.reranker = reranker or CrossEncoderHeuristicReranker()
-        self.provider = get_provider()
+        self.provider = provider or get_provider()
 
     def retrieve(
         self,
