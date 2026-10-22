@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: prism-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: prism
+    volumes:
+      - prism_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d prism"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: prism-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      APP_NAME: "PRISM API"
+      APP_ENV: "production"
+      PORT: "8000"
+      HOST: "0.0.0.0"
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/prism"
+      LLM_PROVIDER: "mock"
+      GEMINI_API_KEY: ""
+      CORS_ORIGINS: '["http://localhost:3000","http://127.0.0.1:3000","https://prism-web.vercel.app","https://web-one-blue-mbb8ovavhb.vercel.app"]'
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "alembic -c api/alembic.ini upgrade head &&
+             python scripts/seed_demo.py &&
+             uvicorn api.main:app --host 0.0.0.0 --port 8000"
+
+volumes:
+  prism_pgdata:
+    driver: local
